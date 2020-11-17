@@ -4,7 +4,7 @@
 
 All members of the project community must abide by the [Contributor Covenant, version 2.0](CODE_OF_CONDUCT.md).
 Only by respecting each other can we develop a productive, collaborative community.
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting [opensource@telekom.de](mailto:opensource@telekom.de) and/or a project maintainer.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting [vineet.hingorani@telekom.de](mailto:vineet.hingorani@telekom.de) and/or a project maintainer.
 
 We appreciate your courtesy of avoiding political questions here. Issues which are not related to the project itself will be closed by our community managers.
 
