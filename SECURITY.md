@@ -4,5 +4,5 @@ This project is built with security and data privacy in mind to ensure your data
 
 **Please do not report security vulnerabilities directly on GitHub. GitHub Issues can be publicly seen and therefore would result in a direct disclosure.**
 
-* Please address questions about data privacy, security concepts, and other media requests to the cert@telekom.de mailbox.
+* Please address questions about data privacy, security concepts, and other media requests to the vineet.hingorani@telekom.de mailbox.
 
