@@ -1,4 +1,16 @@
-""" Persistence service: https://smarthub-wbench.wesp.telekom.net/gitlab/smarthub_cloud/persistence-service """
+#
+# voice-skill-sdk
+#
+# (C) 2020, Deutsche Telekom AG
+#
+# This file is distributed under the terms of the MIT license.
+# For details see the file LICENSE in the top directory.
+#
+#
+
+#
+# Persistence service
+#
 
 import json
 import logging

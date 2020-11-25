@@ -1,4 +1,15 @@
-""" Circuit breaker for skills requesting external services """
+#
+# voice-skill-sdk
+#
+# (C) 2020, Deutsche Telekom AG
+#
+# This file is distributed under the terms of the MIT license.
+# For details see the file LICENSE in the top directory.
+#
+
+#
+# Circuit breaker for skills requesting external services
+#
 
 from .config import config
 from circuitbreaker import CircuitBreaker

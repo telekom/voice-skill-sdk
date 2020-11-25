@@ -1,3 +1,13 @@
+#
+# voice-skill-sdk
+#
+# (C) 2020, Deutsche Telekom AG
+#
+# This file is distributed under the terms of the MIT license.
+# For details see the file LICENSE in the top directory.
+#
+#
+
 ########################################################################################################################
 #                                                                                                                      #
 #   Full functional test:                                                                                              #
@@ -11,8 +21,8 @@
 #                                                                                                                      #
 ########################################################################################################################
 
-""" Monkey-patch as early as possible (http://www.gevent.org/api/gevent.monkey.html) """
-import skill_sdk.manage
+""" Monkey-patch as early as possible  """
+import skill_sdk
 
 import sys
 import gevent

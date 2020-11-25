@@ -1,8 +1,15 @@
-""" Intent/context definition
+#
+# voice-skill-sdk
+#
+# (C) 2020, Deutsche Telekom AG
+#
+# This file is distributed under the terms of the MIT license.
+# For details see the file LICENSE in the top directory.
+#
 
-Details [intro.md](intro.md) and [InvokeSkillRequestDto.json](https://smarthub-wbench.wesp.telekom.net/gitlab/smarthub_cloud/skill-spi/blob/master/src/test/resources/serialized/InvokeSkillRequestDto.json)
-valid [Attribute types](https://smarthub-wbench.wesp.telekom.net/pages/smarthub_cloud/skill-spi/public/index.html#attribute-types)
-"""
+#
+# Intent/context definition
+#
 
 import json
 import logging
