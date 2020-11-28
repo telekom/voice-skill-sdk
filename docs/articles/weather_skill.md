@@ -43,7 +43,7 @@ intents are already defined. This is exactly the case with weather
 skill. Language models for domain **WEATHER** are already in place and
 you can receive them as JSON file that may look like this:
 
-![](./Pictures/10000201000004020000025C48457B712BC85C82.png)
+![](images/domain_json.png)
 
 After a closer look you can see that the whole **WEATHER** domain consists
 of a single intent “**WEATHER\_\_STATUS**” with the whole bunch of
@@ -68,13 +68,13 @@ Let’s use that **new\_skill** command but with `-m` parameter:
 
 > python setup.py new_skill -m skill-weather-de-22.json
 
-![](./Pictures/100002010000031D00000230F00EFC9F6867E614.png)
+![](images/new_skill_weather.png)
 
 In that example I named the skill “**my-weather**” and asked to place
 the project again into my **\~/PycharmProjects** folder. Let’s open the
 project in PyCharm!
 
-![](./Pictures/100002010000044000000298653A3279FD29F090.png)
+![](images/pycharm2.png)
 
 What we see is horrifying! It’s just like few lines of generated code
 but argument hinting suggests that all parameters can be empty. So we’ll

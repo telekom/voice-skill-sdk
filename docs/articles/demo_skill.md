@@ -5,30 +5,15 @@
 ### Python
 
 All code samples in this article are written in Python 3. If you haven’t
-learned Python 3 basics, it’s time to get a quick look at [this tutorial](<https://docs.python.org/3/tutorial/>).
+learned Python 3 basics, it’s time to get a quick look at [this tutorial](https://docs.python.org/3/tutorial/).
 
-If you’re a seasoned Python 2 programmer, make yourself comfortable with
-[parameter and function
-annotations](https://docs.python.org/3/tutorial/controlflow.html#function-annotations)
-because they are heavily used in the code (and not only for a static
-code analysis).
+If you’re a seasoned Python 2 programmer, make yourself comfortable with [parameter and function annotations](https://docs.python.org/3/tutorial/controlflow.html#function-annotations) because they are heavily used in the code (and not only for a static code analysis).
 
-Minimum required Python version is 3.7. The code samples won’t run on
-a lower version. So, if you’re still confused with running multiple
-versions of Python interpreter on your development computer, [Python
-virtual environment management](https://docs.python.org/3/library/venv.html) is what you’re looking for.
+Minimum required Python version is 3.7. The code samples won’t run on a lower version. So, if you’re still confused with running multiple versions of Python interpreter on your development computer, [Python virtual environment management](https://docs.python.org/3/library/venv.html) is what you’re looking for.
 
-Personal advise is to get
-[pipenv](https://docs.pipenv.org/en/latest/) installed – an excellent
-packaging and virtual environment management tool by [Kenneth
-Reitz](https://www.kennethreitz.org/). In fact, when using our skill
-generator, pipenv will be installed automatically without even asking
-you, sorry about that.
+Personal advise is to get [pipenv](https://docs.pipenv.org/en/latest/) installed – an excellent packaging and virtual environment management tool by [Kenneth Reitz](https://www.kennethreitz.org/). In fact, when using our skill generator, pipenv will be installed automatically without even asking you, sorry about that.
 
-We also use [GNU gettext](https://www.gnu.org/software/gettext/) to
-support multi-lingual translations. Make sure **msgfmt**
-utility is in your PATH – skill SDK will try to compile translations
-when being deployed.
+We also use [GNU gettext](https://www.gnu.org/software/gettext/) to support multi-lingual translations. Make sure **msgfmt** utility is in your PATH – skill SDK will try to compile translations when being deployed.
 
 ### Other Recommended Software
 
@@ -76,7 +61,7 @@ mouse-clicks with 7-Zip file manager.
 
 Let’s take a closer look at the SDK folder content:
 
-![](./Pictures/100002010000028A000001621180B0EBB5FD70A1.png)
+![Folder Content](images/folder_content.png)
 
 - **docs**: Folder that contains a complete copy of SDK documentation.
 
@@ -115,7 +100,7 @@ in the repository's URL:
 In the following example I named the skill **demo** and asked to place
 the project into **\~/PycharmProjects** folder:
 
-![](./Pictures/10000201000002DE00000242C02B9559DDDB2F04.png)
+![](images/new_skill.png)
 
 That’s it so far! We have a project **skill-demo-python** in
 **\~/PycharmProjects** folder with a virtual environment created and all
@@ -127,7 +112,7 @@ We can now open the project directly in PyCharm. PyCharm is clever
 enough to recognize our virtual environment inside the project and use
 it as project’s Python interpreter.
 
-![](./Pictures/1000020100000440000002985276CC18487FFDBA.png)
+![](images/pycharm1.png)
 
 Now let’s see what’s inside of our project:
 - **.venv**: Our virtual environment and Python interpreter.
@@ -162,7 +147,7 @@ invoking `manage.py` with different parameters.
 
 Enough said, let’s hit **Alt-Shift-F9** for Linux and **Ctrl-opt-R-D** for MacOS!
 
-![](./Pictures/100002010000044200000297BC89317E79722E78.png)
+![](images/run_config.png)
 
 Our skill generator made four run configurations for us:
 
@@ -173,7 +158,7 @@ Our skill generator made four run configurations for us:
 
 Hit `manage run` and here we are!
 
-![](./Pictures/100002010000044000000298A80EBFD7100B3BCA.png)
+![](images/run_result.png)
 
 What we have here now is a full stack micro-service capable of answering
 three voice intents:
@@ -190,12 +175,12 @@ a joke like “Tell me a joke!”.
 Hit the provided link in [PyCharm’s run window](http://localhost:4242/) and you’ll be
 re-directed to Swagger UI:
 
-![](./Pictures/10000201000004730000028AB61DB2262B9E89D1.png)
+![](images/swagger.png)
 
 Let’s experiment with POST endpoint. This is where intents are landed.
 Click on the **POST** button, scroll down a bit and click on **Try it out**.
 
-![](./Pictures/10000201000004730000028A0B6632BF793C0151.png)
+![](images/try_post.png)
 
 If we hit **Execute** now, our intent handler for the "SMALLTALK\_GREETINGS”
 intent will be invoked and replies with “Hallo” message (see that little
@@ -205,12 +190,12 @@ But let’s set a breakpoint first and
 then go through the execution process. So switch back to PyCharm and set
 a breakpoint at the beginning of our `handler` function:
 
-![](./Pictures/100002010000044000000298AE6949C9D170E9D5.png)
+![](images/debug.png)
 
 Now switch back to the browser and hit **Execute**. Yoohoo! PyCharm is
 blinking because it stopped the execution at the breakpoint:
 
-![](./Pictures/1000020100000440000002984A01E8557B787802.png)
+![](images/stop_at_breakpoint.png)
 
 Now we can walk through the three steps of the “Hello, World!” intent:
 
@@ -230,7 +215,7 @@ Hub environment will result in the speaker saying “Hallo” to the user.
 
 We’re all TDD right? So let’s hit **Alt-Shift-F10** and **manage test**.
 
-![](./Pictures/100002010000044000000298DD7EA3DA5C713BA4.png)
+![](images/test_config.png)
 
 Well, 7 tests ran with no issue. That’s because the skill generator
 created the unit tests for us and they all are predefined to run without
@@ -240,7 +225,7 @@ Let’s see what’s happening in `test_hello_handler`, a test defined
 in `TestMain` class. Set a breakpoint at the first line and hit
 **Alt-Shift-F9** this time and **manage test**.
 
-![](./Pictures/1000020100000440000002986977EA1A4A83FCD1.png)
+![](images/test_debug_1.png)
 
 All testing helpers are defined in `skill_sdk.test_helpers`
 module. The Python interpreter is going to create a test
@@ -248,7 +233,7 @@ context object (a simple dictionary enough to invoke the intent handler) and cal
 
 Hit **F8** to step over:
 
-![](./Pictures/1000020100000440000002980A5085796B1CACD1.png)
+![](images/step_over.png)
 
 We’ve got a Response object from `hello.handler` with type **TELL** (we’re
 telling to the user without asking a response) and text “Hallo”.
@@ -272,7 +257,7 @@ doing:
 Before we proceed further creating a real skill for weather forecast, get yourself comfortable with invoking intent handlers from Swagger UI (or Postman) and play around invoking “**AMUSEMENT\_\_JOKE**”
 and “**MINIGAMES\_\_GUESS\_NUMBER**” intents with parameters:
 
-![](./Pictures/10000201000004730000028A5104293605AC23FC.png)
+![](images/invoke_mini_game.png)
 
 Also worship the Testing Goat a bit more by walking through each step of
 unit testing procedures especially in more complicated cases in

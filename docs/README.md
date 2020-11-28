@@ -1,9 +1,11 @@
-# Skill SDK for Python
+# Magenta Voice Skill SDK for Python
 
-This folder contains the skill SDK for Python documentation.
+This folder contains the voice skill SDK for Python documentation.
 
-In the main folder you find documents that cover generic topics. 
-The `howtos` section contains more practical documents that explain how to solve common problems.
+* The `external_developers` section contains and end-to-end guide on Magenta Voice Platform and the tools to configure skill for Magenta Smart Speakers.
+* In the main folder you find documents that cover generic topics.
+* The `howtos` section contains more practical documents that explain how to solve common problems.
+ 
 
 ## Content
 
@@ -35,3 +37,7 @@ The `howtos` section contains more practical documents that explain how to solve
 
 - [Working with Demo Skill](articles/demo_skill.md)
 - [Creating a Custom Weather Skill](articles/weather_skill.md)
+
+### External Development
+
+- [End-to-end Guide for Voice Platform](external_developers/external_developers.md)
