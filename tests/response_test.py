@@ -17,7 +17,7 @@ from bottle import HTTPResponse
 from skill_sdk import l10n, tell, ask, ask_freetext
 from skill_sdk.test_helpers import create_context
 from skill_sdk.intents import Context
-from skill_sdk.responses import (Card, ErrorResponse, Response, Reprompt,
+from skill_sdk.responses import (Card, GENERIC_DEFAULT, ErrorResponse, Response, Reprompt,
                                  RESPONSE_TYPE_ASK, RESPONSE_TYPE_TELL, RESPONSE_TYPE_ASK_FREETEXT)
 
 
@@ -30,7 +30,7 @@ class TestCard(unittest.TestCase):
 
     def test_init_no_type(self):
         with self.assertRaises(ValueError):
-            Card()
+            Card(None)
 
     def test_dict(self):
         sc = Card('DEMOTYPE')
@@ -44,6 +44,9 @@ class TestCard(unittest.TestCase):
             'version': 1,
             'data': {'title': 'Title', 'text': 'Text', 'keyA': 1},
         })
+
+    def test_init_default_type(self):
+        self.assertEqual(GENERIC_DEFAULT, Card().type_)
 
 
 class TestErrorResponse(unittest.TestCase):

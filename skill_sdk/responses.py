@@ -28,6 +28,9 @@ RESPONSE_TYPE_TELL = 'TELL'
 # : response type to ask additional free text from the user
 RESPONSE_TYPE_ASK_FREETEXT = 'ASK_FREETEXT'
 
+# The only card type available: "GENERIC_DEFAULT"
+GENERIC_DEFAULT = 'GENERIC_DEFAULT'
+
 
 class Card:
     """
@@ -36,19 +39,6 @@ class Card:
     """
 
     VERSION = 1
-
-    def __init__(self, type_="GENERIC_DEFAULT", token_id=None, **kwargs):
-        """
-        :param type_: Types of action cards, only supported right now is GENERIC_DEFAULT
-        :param token_id:
-        :param kwargs:
-        """
-        if not type_:
-            raise ValueError('No type_ specified')
-
-        self.type_ = type_
-        self.token_id = token_id
-        self.data = {snake_to_camel(key): value for key, value in kwargs.items()}
 
     def dict(self):
         """ Export as dictionary
@@ -67,6 +57,19 @@ class Card:
             card['tokenId'] = self.token_id
 
         return card
+
+    def __init__(self, type_=GENERIC_DEFAULT, token_id=None, **kwargs):
+        """
+        :param type_: Types of action cards, only supported right now is GENERIC_DEFAULT
+        :param token_id:
+        :param kwargs:
+        """
+        if not type_:
+            raise ValueError('No type_ specified')
+
+        self.type_ = type_
+        self.token_id = token_id
+        self.data = {snake_to_camel(key): value for key, value in kwargs.items()}
 
 
 class Result:
