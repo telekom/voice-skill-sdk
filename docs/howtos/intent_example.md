@@ -26,7 +26,7 @@ def weather(location: Location) -> Response:
         return ask("Please name a city")
     
     msg = f"It is awesome in {location.text}. At least I hope the sun is shining"
-    card = Card(type_="GENERIC_DEFAULT", text=msg)
+    card = Card(text=msg)
     return tell(msg, card=card)
 ```
 
