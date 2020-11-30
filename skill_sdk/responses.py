@@ -30,11 +30,19 @@ RESPONSE_TYPE_ASK_FREETEXT = 'ASK_FREETEXT'
 
 
 class Card:
-    """ Card to be sent to the companion app """
+    """
+    Card to be sent to the companion app
+
+    """
 
     VERSION = 1
 
-    def __init__(self, type_=None, token_id=None, **kwargs):
+    def __init__(self, type_="GENERIC_DEFAULT", token_id=None, **kwargs):
+        """
+        :param type_: Types of action cards, only supported right now is GENERIC_DEFAULT
+        :param token_id:
+        :param kwargs:
+        """
         if not type_:
             raise ValueError('No type_ specified')
 
