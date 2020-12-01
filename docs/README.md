@@ -2,7 +2,7 @@
 
 This folder contains the voice skill SDK for Python documentation.
 
-* The `external_developers` section contains and end-to-end guide on Magenta Voice Platform and the tools to configure skill for Magenta Smart Speakers.
+* The `external_developers` section contains an end-to-end guide on Magenta Voice Platform and the tools to configure skill for Magenta Smart Speakers.
 * In the main folder you find documents that cover generic topics.
 * The `howtos` section contains more practical documents that explain how to solve common problems.
  
