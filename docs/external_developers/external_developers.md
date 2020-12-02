@@ -185,7 +185,7 @@ To make your skill work with the speaker, you have to do the following steps. *R
 ![SDP Tester](images/adding_nickname.png)
 
 * *Configuring the skill parameters in development environment*
-    * In the dev config tab of SDP's specific skill page, Skill Developer configures the deployed link of the skill, assigned skill domain, generates api key for the micro-service, etc.
+    * In the dev config tab of SDP's specific skill page, Skill Developer configures the deployed link of the skill, assigned skill domain, generates api key for the micro-service, catalog for Hallo Magenta! app (companion app), etc.
     * To be able to help with CVI related configurations, send an email to the Magenta Admin with the following information:
         * Assigning the right Voice Processing Profile/Voice Processing Chain: Your User ID (or nickname) for the admin to change your Voice Processing Profile. The whole voice processing chain is defined in a profile. This is only necessary if you as a Skill Developer and Provider developing the skill and configuring it for the first time in SDP.
         * Custom skill domains: If you’re building a new functionality with custom skill domain, you need a new domain to assign the same to your skill.
@@ -193,6 +193,7 @@ To make your skill work with the speaker, you have to do the following steps. *R
 ![SDP Dev Config](images/sdp_dev_config.png)
 
 * *Adding a Catalogue to your Skill for the companion app*: If there are multiple skills implemented for the same set of intents, one needs to choose between the preferred skill from the companion app.
+    * Here is a [detailed documentation](../catalog.md) on Catalog json.
     * You can download a template (JSON) for the Catalog [here](config_jsons/crypto_catalog_de.json). You can change the display name & description before uploading it as per your skill.
 ![SDP Catalog](images/catalog.png)
 

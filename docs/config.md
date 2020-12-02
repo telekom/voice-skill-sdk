@@ -1,7 +1,7 @@
 
 # Skill Configuration Reference
 
-Skills microservice has a number of configuration settings. These setting are stored in a configuration file, 
+Skill microservice has a number of configuration settings. These setting are stored in a configuration file, 
 named `skill.conf` per convention. 
 
 During a skill startup, the SDK searches this file in the following well-known locations: 
