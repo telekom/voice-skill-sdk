@@ -44,9 +44,9 @@ This repository uses the `*_test.py` naming schema. PyCharm discovers everything
 
 ### Quickstart
 
-Make sure to have an actual version of <a href="https://docs.python.org/3/">**Python 3**</a> (3.7 is minimum required)
+Make sure to have an current version of <a href="https://docs.python.org/3/">**Python 3**</a> (3.7 is minimum required)
 and <a href="https://pip.pypa.io/en/stable/">**pip**</a> installed. Use
-`apt-get install python3-pip` if you don't on Ubuntu or `brew install python3` on MacOS.
+`apt-get install python3-pip` on Ubuntu (or any other Debian-based distro) or `brew install python3` on MacOS.
 
 > _Note:_ Some distros might require `python3-venv` package installed.
 > Run `apt-get install python3-venv` if you encounter difficulties when creating virtual environments for new projects. 
@@ -62,8 +62,8 @@ and <a href="https://pip.pypa.io/en/stable/">**pip**</a> installed. Use
 
 
 You'll be prompted for:
-- The skill name. Give it an Awesome Name! 
-- Programming language. Python is Awesome!
+- The skill name. Give it an awesome Name! 
+- Programming language. Python is awesome!
 - The directory where the project will be created. Make sure it's writable. 
 
 This script will:
