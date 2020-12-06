@@ -7,3 +7,4 @@ __pycache__
 /.project
 /.pydevproject
 skill_sdk.egg-info/
+locale/*.mo
