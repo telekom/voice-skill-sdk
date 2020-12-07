@@ -65,7 +65,7 @@ Use the `*_test.py` schema for naming. PyCharm discovers everything automaticall
 
 >If you want to invoke unit tests from the command line, check the `scripts/test/` folder.
 
-(TODO:) They will be run during deployment and when `manage.py test` is called.
+The tests are executed during deployment and when `manage.py test` is called.
 
 ### `manage.py`
 
@@ -80,10 +80,21 @@ This file is in the format as dumped by `pip freeze`.
 
 ### `tokens.json` (optional)
 
-TODO: Check the documentation here and how to expose the internal link.
+If your skill requires static authentication tokens during run-time, 
+you can place them to `tokens.json` file in a project root.
 
-The `tokens.json` file contains a JSON object with the key `tokens`. They contain an array of token objects as defined in the [Skill API Documentation](https://gard.telekom.de/gardwiki/display/SH/Skill+Info+Definiton).
+The file is expected to contain a JSON object with tokens as keys:
 
-    {"tokens": […]}
+```json
+{
+  "oauth2": "eyJ..."
+}
+```
 
+The tokens will be loaded during skill deployment and exposed to a skill as `config.tokens`:
 
+```
+>>> from skill_sdk.config import config
+>>> config.tokens
+{'oauth2': 'eyJ...'}
+```

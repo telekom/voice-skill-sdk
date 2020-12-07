@@ -56,9 +56,7 @@ still need to create and publish your skill as WSGI application. Yet Functions h
 API endpoints and there is no *zappa-like* tool to help you. 
 
 1. Make sure to install the latest version of [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
-and [Azure Functions Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local) 
-
-[TODO: specify minimal version when deployment of the issue https://github.com/Azure/azure-functions-python-library/issues/52 is done]
+and [Azure Functions Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local) (minimal version is 1.2.0)
 
 2. Initialize your project for Azure issuing `func init --python`.
 This will create `host.json`, `local.settings.json` and `.funcignore` files in your project root.
