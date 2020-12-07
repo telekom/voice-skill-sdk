@@ -1,10 +1,10 @@
 # How to use Persistence Service
 
-[Persistence Service](https://gard.telekom.de/gardwiki/display/SH/Persistence+Service) is an internal key/value cloud storage
+Persistence Service is an internal key/value cloud storage
 that you can use to keep an intermediate skill state. The data sent to the service persists between device sessions or skill restarts and re-deployments.
 
 > Persistence service requires a service token for authentication. 
-> How to request a token using skill manifest: [CVI docs](https://smarthub-wbench.wesp.telekom.net/pages/smarthub_cloud/cvi-core/public/#cvi)
+> How to request a token using [skill manifest](skill_manifest.md)
 
 ## API
 

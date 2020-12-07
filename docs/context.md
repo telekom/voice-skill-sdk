@@ -71,6 +71,8 @@ The defined token name is the key of the dictionary. The token has strings as va
     
 ### Attribute "configuration"
 
+TODO: Check whether the configuration attribute internal doc can be exposed.
+
 The `configuration` is a dictionary of lists that contains items of the types defined in the [Generic Skill Configuration](https://gard.telekom.de/gardwiki/display/SH/Generic+skill+configuration).
 
 **Example**

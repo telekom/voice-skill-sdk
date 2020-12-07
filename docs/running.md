@@ -59,7 +59,7 @@ The global argument `--help` (`-h`) shows the help message.
 
 #### Global argument `--local` (`-l`)
 
-The global argument `--local` (or short `-l`) injects a proxy configuration into service REST calls. For further information, click [here](local_services.md).
+The global argument `--local` (or short `-l`) injects a proxy configuration into service REST calls. For further information, click [here](howtos/local_services.md).
 
 #### Global argument `--dev` (`-t`)
 

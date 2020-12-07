@@ -183,7 +183,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual('Test_Helper_Intent', context.intent_name)
 
     def test_create_context_remove_none_values(self):
-        """ Do not add "None" values to test context (https://gard.telekom.de/gard/browse/HMPOP-402) """
+        """ Do not add "None" values to test context """
 
         result = create_context('Test_Helper_Intent', none_value=None)
         self.assertEqual({'timezone': [

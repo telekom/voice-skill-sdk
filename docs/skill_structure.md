@@ -80,6 +80,8 @@ This file is in the format as dumped by `pip freeze`.
 
 ### `tokens.json` (optional)
 
+TODO: Check the documentation here and how to expose the internal link.
+
 The `tokens.json` file contains a JSON object with the key `tokens`. They contain an array of token objects as defined in the [Skill API Documentation](https://gard.telekom.de/gardwiki/display/SH/Skill+Info+Definiton).
 
     {"tokens": […]}

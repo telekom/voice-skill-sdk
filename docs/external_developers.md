@@ -13,7 +13,7 @@ To understand how the flow of your command works, let's go through an overview o
 
 The diagram below shows the interaction:
 
-![skill_invocation](images/skill_invocation.png)
+![skill_invocation](external_developers/images/skill_invocation.png)
 
 It is also important to understand a few terminologies before you can jump onto creating a skill.
  
@@ -50,7 +50,7 @@ The Voice Platform will identify one intent (get the weather) and two entities:
 * a time parameter - with the value "tomorrow"
 * a location parameter - with the value "Berlin"
 
-You can read more about entities [here](../entities.md) 
+You can read more about entities [here](entities.md) 
 
 #### Hybrid Skill
 
@@ -59,7 +59,7 @@ A hybrid skill is a type of skill which requires a local plugin (also called as 
 * the Deezer bot requires a local Deezer plugin running on the speaker, to manage the Deezer DRM.
 * the DECT skill requires a local plugin on the Magenta smart speaker to pilot the DECT chipset of the speaker.
 
-Further information [here](../use_kits_and_actions.md)
+Further information [here](use_kits_and_actions.md)
 
 #### Context
 
@@ -73,13 +73,17 @@ Before calling an intent handler function, SDK injects the context object into t
 <voice_sdk.intents.LocalContext object at 0x7faa1bc75910>
 ```
 
-You can read more about context [here](../context.md)
+You can read more about context [here](context.md)
 
 #### Responses
 
 Any valid call of an intent handler may return Response type object. If a call of the intent is valid, the requested user action processed as intended. Furthermore, it covers any exception from the normal processing that is handled by notifying the client/user about the result. In other words: Everything that is not an unrecoverable error.
 
-You can read more about responses [here](../response.md)
+You can read more about responses [here](response.md)
+
+#### Internationalization and Localization
+
+Here is a [detailed information](i18n.md) about how to use translations for the implementation of a skill.
 
 ## Skill Lifecycle
 
@@ -87,13 +91,13 @@ Let's jump right into the implementation and configuration of a skill.
 
 The lifecycle of developing a skill and integrating (configuring) the skill in the voice chain is divided in 5 phases:
 
-1. [Skill Provider Registration](skill_provider_registration.md)
+1. [Skill Provider Registration](external_developers/skill_provider_registration.md)
     * Inviting users as Skill Providers on Skill Development Portal (SDP) to create new skills in the tool under existing domains.
-2. [Skill Initiation](skill_initiation.md)
+2. [Skill Initiation](external_developers/skill_initiation.md)
     * Inviting users as Skill Developers for skills (on SDP) and their configurations created by Skill Providers. Skill configuration can be changed and managed by Skill Developers after this step.
-3. [Skill Development]
+3. [Skill Development](external_developers/skill_development.md)
     * Implementing a skill as a micro-service, deploying it as a web application and testing it end to end using the voice assistant
-4. [Skill Publishing]
+4. [Skill Publishing](external_developers/skill_publishing.md)
     * Bringing the skill to production for all the users
-5. [Skill Deletion]
+5. [Skill Deletion](external_developers/skill_deletion.md)
     * Deleting skill configurations from SDP

@@ -30,7 +30,7 @@ The full documentation on how to use this software development kit is available 
 
 - The [installation guide](docs/install.md) for technical details. 
 - Have a look at the [Contribution Guide](CONTRIBUTING.md)
-- [End-to-end documentation](docs/external_developers/external_developers.md) on how to build skills
+- [End-to-end documentation](docs/external_developers.md) on how to build skills
 - [Working with Demo Skill](docs/articles/demo_skill.md)
 - [Creating a Custom Weather Skill](docs/articles/weather_skill.md)
 

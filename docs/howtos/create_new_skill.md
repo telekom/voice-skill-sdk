@@ -33,7 +33,7 @@ in the repository's URL, for example:
 >index-url = https://username:password@pypi.example.com/simple
 >```
 
-![Screenshot](new-skill.jpg)
+![Screenshot](../images/new-skill.jpg)
 
 > If you get the error `This package requires Python version >= 3.7 and Python's setuptools`,
 you happen to have an outdated Python version.
