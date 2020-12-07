@@ -71,15 +71,88 @@ The defined token name is the key of the dictionary. The token has strings as va
     
 ### Attribute "configuration"
 
-TODO: Check whether the configuration attribute internal doc can be exposed.
+Skill can define a number of configuration options that are exposed to end user via companion app.
+These options must be defined in skill manifest. Their values are made available in the `context.configuration` and passed with every skill invoke.
 
-The `configuration` is a dictionary of lists that contains items of the types defined in the [Generic Skill Configuration](https://gard.telekom.de/gardwiki/display/SH/Generic+skill+configuration).
+A configuration option must be defined with the attributes below:
+  - name
+  - localized label
+  - localized description
+  - data type (string, int number, float number, boolean, list)
+  - required flag
+  - localized list values - only if the data type is a list. Every list value has a canonical id which is stored and sent to the skill on invocation.
+  - list display (radiobox, dropdown, etc.) - only if the data type is a list
+  - multiselect: If true, the user can select more than one list value,
 
 **Example**
 
-    {
-        'key1': ['abc'],
-        'setting_a': [1, 2, 3]
-    }
+Configuration option sample of a skill, that can store user's favorite football team:
 
-A user can set a given set of preference variables as defined in the skill manifest. These values are made available in the `context.configuration` and passed with every skill invoke.
+```json
+{
+    "configuration": [
+        {
+            "name": "favourite-team",
+            "label": {
+                "de": "Lieblingsmannschaft",
+                "en": "Favourite team"
+            },
+            "description": {
+                "de": "Ihre Lieblingsmannschaft",
+                "en": "Your favourite team"
+            },
+            "type": "string",
+            "required": true,
+            "list": {
+                "values": [
+                    {
+                        "id":"bayern",
+                        "label": {
+                            "de": "FC Bayern München",
+                            "en": "FC Bayern München"   
+                        }
+                    },
+                    {
+                        "id": "1860",
+                        "label": {
+                            "de": "1860 München",
+                            "en": "1860 München"   
+                        }
+                    }
+                ],
+                "display": "dropdown",
+                "multiselect": false
+            }
+        }
+    ]
+}
+```
+where:
+
+| field | description   | allowed value |
+|-------|-----------|------:|
+| name | Name of the configuration entry. Must be unique.   |  a-Z A-Z 0-9 dash underscore |
+| type | Data type of the configuration entry.  |  string, int, float, boolean, date, time, datetime, list    |
+| label | 	Localized label which gets displayed to the user.  | Dictionary from locale → string     |
+| description    | Localized description which gets displayed to the user.  |  Dictionary from locale → string    |
+| required      | 	Flag to mark required entries.  |  true, false    |
+| list.values      | 	Selectable values. Ignored if data type is not "list"  |  Array of values.    |
+| list.values.id   | Canonical value for that list item. This id is sent to the skill on invocation.  |   *  |
+| list.values.label      | 	Localized label of the list item  | Every value is a dictionary from locale → string     |
+| list.display      | Selects how a list is displayed. Ignored if data type is not "list"  |   "dropdown", "radiobox", "checkbox". Only "checkbox" is allowed if multiselect is true.   |
+| list.multiselect      | 	Flag to enable to select more than one list item.  |  true, false    |
+
+CVI Core supplies configuration values to skill on invoke:
+
+```json
+{
+  "context": {
+    "intent": "...",
+    "attributes": { ... },
+    "configuration": {
+      "favourite-team": ["1860"]
+    }
+  },
+  "session": { ... }
+}
+```
