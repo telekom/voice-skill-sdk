@@ -51,6 +51,48 @@ class TestUtils(unittest.TestCase):
         self.assertEqual('camelCase', snake_to_camel('camelCase'))
 
 
+class TestEntityDateList(unittest.TestCase):
+
+    def test_to_date_list(self):
+        date_list = entities.to_date_list(["27.02.1980","--04-05","2019-05-04"])
+        self.assertEqual(datetime.date(year=1980, month=2, day=27), date_list[0])
+        self.assertEqual(datetime.date(year=datetime.datetime.now().year, month=4, day=5), date_list[1])
+        self.assertEqual(datetime.date(year=2019, month=5, day=4), date_list[2])
+
+    def test_filter_date_list(self):
+        date_list = [datetime.date(year=1980, month=2, day=27),
+                     datetime.date(year=1980, month=1, day=27),
+                     datetime.date(year=1980, month=2, day=28),
+                     datetime.date(year=1980, month=3, day=27),
+                     datetime.date(year=1981, month=2, day=27),
+                     datetime.date(year=1979, month=2, day=27)]
+
+        all_list = entities.filter_date_list(date_list)
+        self.assertEqual(len(all_list), 6)
+        self.assertEqual(datetime.date(year=1979, month=2, day=27), all_list[0])
+        self.assertEqual(datetime.date(year=1980, month=1, day=27), all_list[1])
+        self.assertEqual(datetime.date(year=1980, month=2, day=27), all_list[2])
+        self.assertEqual(datetime.date(year=1980, month=2, day=28), all_list[3])
+        self.assertEqual(datetime.date(year=1980, month=3, day=27), all_list[4])
+        self.assertEqual(datetime.date(year=1981, month=2, day=27), all_list[5])
+
+        before_list = entities.filter_date_list(date_list, before=datetime.date(year=1980, month=2, day=27))
+        self.assertEqual(len(before_list), 2)
+        self.assertEqual(datetime.date(year=1979, month=2, day=27), before_list[0])
+        self.assertEqual(datetime.date(year=1980, month=1, day=27), before_list[1])
+
+        after_list = entities.filter_date_list(date_list, after=datetime.date(year=1980, month=2, day=27))
+        self.assertEqual(len(after_list), 3)
+        self.assertEqual(datetime.date(year=1980, month=2, day=28), after_list[0])
+        self.assertEqual(datetime.date(year=1980, month=3, day=27), after_list[1])
+        self.assertEqual(datetime.date(year=1981, month=2, day=27), after_list[2])
+
+        between_list = entities.filter_date_list(date_list, after=datetime.date(year=1980, month=1, day=27), before=datetime.date(year=1980, month=3, day=27))
+        self.assertEqual(len(between_list), 2)
+        self.assertEqual(datetime.date(year=1980, month=2, day=27), between_list[0])
+        self.assertEqual(datetime.date(year=1980, month=2, day=28), between_list[1])
+
+
 class TestEntityOnOff(unittest.TestCase):
 
     def test_values_on(self):
