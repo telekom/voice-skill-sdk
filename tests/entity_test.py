@@ -53,12 +53,6 @@ class TestUtils(unittest.TestCase):
 
 class TestEntityDateList(unittest.TestCase):
 
-    def test_to_date_list(self):
-        date_list = entities.to_date_list(["27.02.1980","--04-05","2019-05-04"])
-        self.assertEqual(datetime.date(year=1980, month=2, day=27), date_list[0])
-        self.assertEqual(datetime.date(year=datetime.datetime.now().year, month=4, day=5), date_list[1])
-        self.assertEqual(datetime.date(year=2019, month=5, day=4), date_list[2])
-
     def test_filter_date_list(self):
         date_list = [datetime.date(year=1980, month=2, day=27),
                      datetime.date(year=1980, month=1, day=27),

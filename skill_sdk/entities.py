@@ -30,16 +30,12 @@ def get_entity(entities: List[Any]) -> Optional[Any]:
     return next(iter(entities), None) if isinstance(entities, (list, tuple)) else entities
 
 
-def to_date_list(entities: List[Any]) -> List[datetime.date]:
-    """ convert a list of entities to a list of dates
-    """
-    return [to_date(d) for d in entities]
-
 def to_integer(dt_time: datetime.date):
     """ convert the date to a human readable int
     """
     # for details: https://stackoverflow.com/questions/28154066/how-to-convert-datetime-to-integer-in-python
     return 10000*dt_time.year + 100*dt_time.month + dt_time.day
+
 
 def filter_date_list(datelist: List[datetime.date], after: datetime.date = datetime.date.min, before: datetime.date = datetime.date.max):
     """ filter a list of dates to a list of dates to be limited within a range and order it at once
