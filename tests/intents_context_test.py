@@ -112,3 +112,41 @@ class TestIntentsContext(unittest.TestCase):
                 self.assertEqual(local_today.day, 20)
                 self.assertEqual(local_today.hour, 0)
                 self.assertEqual(local_today.minute, 0)
+
+    def test_previous_date_functions(self):
+        self.ctx.attributes["date"] = [datetime.date(year=1980, month=2, day=27),
+                                               datetime.date(year=1980, month=1, day=27),
+                                               datetime.date(year=1980, month=2, day=28),
+                                               datetime.date(year=1980, month=3, day=27),
+                                               datetime.date(year=1981, month=2, day=27),
+                                               datetime.date(year=1979, month=2, day=27)]
+
+        now = datetime.datetime(year=1980, month=2, day=26, hour=23, minute=42, tzinfo=tz.tzutc())
+        with mock_datetime_now(now, datetime):
+            with patch.dict(os.environ, {'TZ': 'UTC'}):
+                self.assertEqual(self.ctx.attributes.get('timezone'), ["Europe/Berlin"])
+                self.assertEqual(self.ctx.gettz().tzname(now), 'CET')
+                #not 1980-2-27, because 23h UTC will become next day CET
+                self.assertEqual(self.ctx.closest_previous_date(),datetime.date(year=1980, month=1, day=27))
+                #check fall back to today
+                self.ctx.attributes["date"] = []
+                self.assertEqual(self.ctx.closest_previous_date(), self.ctx.now().date())
+
+    def test_next_date_functions(self):
+        self.ctx.attributes["date"] = [datetime.date(year=1980, month=2, day=27),
+                                               datetime.date(year=1980, month=1, day=27),
+                                               datetime.date(year=1980, month=2, day=28),
+                                               datetime.date(year=1980, month=3, day=27),
+                                               datetime.date(year=1981, month=2, day=27),
+                                               datetime.date(year=1979, month=2, day=27)]
+
+        now = datetime.datetime(year=1980, month=2, day=27, hour=23, minute=42, tzinfo=tz.tzutc())
+        with mock_datetime_now(now, datetime):
+            with patch.dict(os.environ, {'TZ': 'UTC'}):
+                self.assertEqual(self.ctx.attributes.get('timezone'), ["Europe/Berlin"])
+                self.assertEqual(self.ctx.gettz().tzname(now), 'CET')
+                #not 1980-2-28, because 23h UTC will become next day CET
+                self.assertEqual(self.ctx.closest_next_date(),datetime.date(year=1980, month=3, day=27))
+                #check fall back to today
+                self.ctx.attributes["date"] = []
+                self.assertEqual(self.ctx.closest_next_date(), self.ctx.now().date())

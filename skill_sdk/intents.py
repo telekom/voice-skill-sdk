@@ -24,6 +24,7 @@ from .l10n import _, get_translation, set_current_locale
 from .tracing import start_span
 from .responses import ErrorResponse, Response
 from .sessions import Session
+from skill_sdk.entities import filter_date_list
 
 logger = logging.getLogger(__name__)
 
@@ -173,6 +174,34 @@ class Context:
         """
         timezone = self.gettz()
         return datetime.datetime.now(datetime.timezone.utc).astimezone(timezone)
+
+
+    def closest_previous_date(self, attr:str ='date') -> datetime.date:
+        """ get the closest past date from an entity to today
+            if no entity name is provided, the entity 'date' is used
+            if no past date is found, the current date is returned.
+        """
+        _datelist = self.attributes.get(attr, [])
+        _today = self.now().date()
+        _past_dates = filter_date_list(_datelist,before=_today)
+        if len(_past_dates)>0:
+            return _past_dates[-1]
+        else:
+            return _today
+
+
+    def closest_next_date(self, attr:str ='date') -> datetime.date:
+        """ get the closest future date from an entity to today
+            if no entity name is provided, the entity 'date' is used
+            if no future date is found, the current date is returned.
+        """
+        _datelist = self.attributes.get(attr, [])
+        _today = self.now().date()
+        _future_dates = filter_date_list(_datelist,after=_today)
+        if len(_future_dates)>0:
+            return _future_dates[0]
+        else:
+            return _today
 
 
 class LocalContext(Context):
