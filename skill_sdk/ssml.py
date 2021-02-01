@@ -23,12 +23,12 @@ DEFAULT_LOCALE = "de"
 
 
 class SSMLException(Exception):
-    """ Exception raised if an SSML tag or entity is incorrect
-    """
+    """Exception raised if an SSML tag or entity is incorrect"""
 
 
 def escape(text: str) -> str:
-    """ Escape special characters
+    """
+    Escape special characters
 
     @param text:
     @return:
@@ -47,7 +47,8 @@ def escape(text: str) -> str:
 
 
 def validate_locale(locale: str) -> None:
-    """ Validate locale
+    """
+    Validate locale
 
     @param locale:
     @return:
@@ -60,7 +61,8 @@ def validate_locale(locale: str) -> None:
 
 
 def validate_duration(duration: str):
-    """ Parse and validate duration [0 - 10000ms]
+    """
+    Parse and validate duration [0 - 10000ms]
 
     @param duration:
     @return:
@@ -85,7 +87,8 @@ def validate_duration(duration: str):
 
 
 def pause(text: str = None, duration: str = None, strength: str = None):
-    """ Insert <break/> tag
+    """
+    Insert <break/> tag
 
     @param text:
     @param duration:
@@ -105,11 +108,12 @@ def pause(text: str = None, duration: str = None, strength: str = None):
             raise SSMLException(f"Invalid strength value {repr(strength)}. Must be one of {STRENGTH}")
 
     else:
-        raise SSMLException(f'Please set one of "duration"/"strength" parameters when setting a break')
+        raise SSMLException('Please set one of "duration"/"strength" parameters when setting a break')
 
 
 def paragraph(text: str) -> str:
-    """ Insert paragraph <p/> tag
+    """
+    Insert paragraph <p/> tag
 
     @param text:
     @return:
@@ -118,7 +122,8 @@ def paragraph(text: str) -> str:
 
 
 def sentence(text: str) -> str:
-    """ Insert sentence <s/> tag
+    """
+    Insert sentence <s/> tag
 
     @param text:
     @return:
@@ -127,7 +132,8 @@ def sentence(text: str) -> str:
 
 
 def spell(text: str) -> str:
-    """ Insert say-as/spell-out tag to spell the text
+    """
+    Insert say-as/spell-out tag to spell the text
 
     @param text:
     @return:
@@ -136,7 +142,8 @@ def spell(text: str) -> str:
 
 
 def phone(text: str) -> str:
-    """ Insert say-as/phone tag
+    """
+    Insert say-as/phone tag
 
     @param text:
     @return:
@@ -145,7 +152,8 @@ def phone(text: str) -> str:
 
 
 def ordinal(text: str) -> str:
-    """ Insert say-as/ordinal tag
+    """
+    Insert say-as/ordinal tag
 
     @param text:
     @return:
@@ -154,7 +162,8 @@ def ordinal(text: str) -> str:
 
 
 def emphasis(text: str, level: str = "moderate") -> str:
-    """ Insert emphasis tag: <emphasis/>
+    """
+    Insert emphasis tag: <emphasis/>
 
     @param text:
     @param level:
@@ -167,7 +176,8 @@ def emphasis(text: str, level: str = "moderate") -> str:
 
 
 def lang(text: str, locale: str = DEFAULT_LOCALE) -> str:
-    """ Insert language <lang/> tag
+    """
+    Insert language <lang/> tag
 
     @param text:
     @param locale:
@@ -180,10 +190,11 @@ def lang(text: str, locale: str = DEFAULT_LOCALE) -> str:
 
 
 def audio(src: str) -> str:
-    """ Insert audio tag
+    """
+    Insert audio tag
 
-            The tag is currently not supported by Nuance, please use `audio_player` kit:
-            docs/use_kits_and_actions.md
+        The tag is currently not supported by Nuance, please use `audio_player` kit:
+        docs/use_kits_and_actions.md
 
     :param src:
     :return:
@@ -191,17 +202,18 @@ def audio(src: str) -> str:
     return f'<audio src="{src}"/>'
 
 
-def speak(text: str) -> str:
-    """ Wrap text in <speak/> tag
+def speak(*text: str) -> str:
+    """
+    Wrap text in <speak/> tag
 
     @param text:
     @return:
     """
-    return f'<speak>{text}</speak>'
+    return f'<speak>{"".join(text)}</speak>'
 
 
 class Speech:
-    """ SSML speech """
+    """SSML speech"""
 
     content: List[str]
     locale: str

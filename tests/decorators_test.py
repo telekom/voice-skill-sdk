@@ -13,7 +13,7 @@ from typing import List
 
 from skill_sdk import l10n, intents, entities
 from skill_sdk.intents import Context
-from skill_sdk.test_helpers import create_context
+from skill_sdk.test_helpers import create_context, mock_datetime_now
 from skill_sdk.decorators import intent_handler
 
 l10n.translations = {'de': l10n.Translations()}
@@ -153,6 +153,19 @@ class TestHandlerDecorator(unittest.TestCase):
 
         result = decorated_test('2001-12-31', ['2001-12-31', '1001-12-31', ])
         self.assertEqual(result, ('2001-12-31', ['2001-12-31', '1001-12-31', ]))
+
+    @mock_datetime_now(datetime.datetime(year=2100, month=12, day=31, hour=15), datetime)
+    def test_multiple_date_values(self):
+        """ Improve LUIS weekday parsing """
+        from dateutil.tz import tzutc
+
+        @intent_handler
+        def date_test(date: [datetime.datetime]):
+            return tuple(date)
+
+        ctx = create_context('TEST_CONTEXT', date=['2100-12-31', 'T13:00:00Z'])
+        self.assertEqual((datetime.datetime(2100, 12, 31, 0, 0),
+                          datetime.datetime(2100, 12, 31, 13, 0, tzinfo=tzutc())), date_test(ctx))
 
 
 class TestAttributesV2(unittest.TestCase):

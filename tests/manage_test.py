@@ -93,7 +93,7 @@ class TestManage(unittest.TestCase):
         self.assertTrue(run_func_tests())
         self.assertEqual(run_tests(cover=True), 0)
         self.assertEqual(run_tests(cover=False), 0)
-        with patch('skill_sdk.manage.Coverage.report', return_value=40):
+        with patch('coverage.Coverage.report', return_value=40):
             self.assertEqual(run_tests(cover=50), '\nFAIL: expected 50% coverage')
         with patch('skill_sdk.manage.run_unit_tests', return_value=False):
             self.assertEqual(run_tests(), 'FAIL: unit tests')

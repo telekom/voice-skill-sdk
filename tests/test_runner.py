@@ -66,6 +66,7 @@ config.read_dict({
         'name': 'test',
         'id': 'test',
         'version': '1',
+        'debug': 'no'
     },
     'http': {
         'server': 'gunicorn',
@@ -104,13 +105,14 @@ class TestRunnerDev(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-
         cls.bottle = gevent.spawn(cls.bottle_run)
         gevent.sleep(0)
 
     @classmethod
     def tearDownClass(cls):
-        cls.bottle.kill(exception=KeyboardInterrupt)
+        while not cls.bottle.dead:
+            cls.bottle.kill(exception=KeyboardInterrupt)
+            gevent.sleep(0)
 
     def test_info_response(self):
         """ Get an "info" response

@@ -107,7 +107,7 @@ class TextService(BaseService):
     @property
     def scope(self):
         return config.get('i18n', 'scope', fallback=config.get('skill', 'name', fallback='unnamed-skill'))
-    
+
     @CallCache([LocalTimeoutCache(60)])
     def supported_locales(self):
         locales = []

@@ -36,8 +36,8 @@ def snake_to_camel(name):
     :param name:
     :return:
     """
-    first, *others = name.split('_')
-    return ''.join([first.lower(), *map(str.title, others)])
+    reg_ex = re.compile(r'_+[a-z0-9]')
+    return reg_ex.sub(lambda x: x.group(0)[1].upper(), name)
 
 
 def camel_to_snake(name):

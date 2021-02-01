@@ -23,7 +23,7 @@ import configparser
 import unittest.mock
 from functools import partial
 from threading import Thread
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 from types import SimpleNamespace
 
 from .__version__ import __spi_version__
@@ -35,7 +35,7 @@ from .responses import RESPONSE_TYPE_ASK, RESPONSE_TYPE_TELL, RESPONSE_TYPE_ASK_
 
 # Load swagger UI
 try:
-    import swagger_ui   # NOSONAR
+    import swagger_ui        # noqa: F401
 except ModuleNotFoundError:  # pragma: no cover
     pass
 

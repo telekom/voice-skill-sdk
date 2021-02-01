@@ -153,10 +153,10 @@ class TestHelpers(unittest.TestCase):
         def decorated_test(date_str: str = None, date_date: datetime.date = None):
             return Response(f"{date_str}", date_date=date_date)
 
-        result = invoke_intent('Test_Helper_Intent', date_str=['2001-12-31', '2001-12-31', ],
-                               date_date=['2001-12-31', '1001-12-31', ])
-        self.assertEqual(result.text, '2001-12-31')
-        self.assertEqual(result.result['date_date'], '2001-12-31')
+        response = invoke_intent('Test_Helper_Intent', date_str=['2001-12-31', '2001-12-31', ],
+                                 date_date=['2001-12-31', '1001-12-31', ])
+        self.assertEqual(response.text, '2001-12-31')
+        self.assertEqual(response.result['date_date'], datetime.date(2001, 12, 31))
 
         with self.assertRaises(KeyError):
             invoke_intent('Test_Blah_Intent')

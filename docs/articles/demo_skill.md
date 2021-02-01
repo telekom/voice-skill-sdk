@@ -11,8 +11,6 @@ If you’re a seasoned Python 2 programmer, make yourself comfortable with [para
 
 Minimum required Python version is 3.7. The code samples won’t run on a lower version. So, if you’re still confused with running multiple versions of Python interpreter on your development computer, [Python virtual environment management](https://docs.python.org/3/library/venv.html) is what you’re looking for.
 
-Personal advise is to get [pipenv](https://docs.pipenv.org/en/latest/) installed – an excellent packaging and virtual environment management tool by [Kenneth Reitz](https://www.kennethreitz.org/). In fact, when using our skill generator, pipenv will be installed automatically without even asking you, sorry about that.
-
 We also use [GNU gettext](https://www.gnu.org/software/gettext/) to support multi-lingual translations. Make sure **msgfmt** utility is in your PATH – skill SDK will try to compile translations when being deployed.
 
 ### Other Recommended Software
@@ -52,10 +50,10 @@ use, you have to get a copy of the latest source archive.
 Installing the SDK for Python is as easy as unpacking a **.tar.gz**
 archive to a folder of your choice:
 
-> tar xzf skill_sdk-1.2.2.tar.gz
+> tar xzf skill_sdk-0.10.4.tar.gz
 
 This command will unpack the SDK sources and documentation to a folder
-named **skill\_sdk-1.2.2**. For the unfortunate Windows users, you
+named **skill\_sdk-0.10.4**. For the unfortunate Windows users, you
 can achieve a similar effect with a combination of right- or double-
 mouse-clicks with 7-Zip file manager.
 

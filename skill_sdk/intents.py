@@ -11,7 +11,6 @@
 # Intent/context definition
 #
 
-import json
 import logging
 import datetime
 import importlib
@@ -46,7 +45,8 @@ ArgumentMissingError = AttributeMissingError
 
 
 class EntityValueException(Exception):
-    """ Entity values conversion exception
+    """
+    Entity values conversion exception
     """
 
     def __init__(self, ex, value=None, func=None, *args):
@@ -120,7 +120,8 @@ class Context:
         return next(iter(self.attributes.get(attr, [])), default)
 
     def dict(self) -> Dict:
-        """ Export as dictionary
+        """
+        Export as dictionary
 
         :return:
         """
@@ -142,16 +143,23 @@ class Context:
         return str(self.dict())
 
     def gettz(self) -> datetime.tzinfo:
-        """ Get device timezone from context attributes
-            https://smarthub-wbench.wesp.telekom.net/pages/smarthub_cloud/skill-spi/public/#attribute-types
+        """
+        Get device timezone from context attributes
 
         :return:
         """
-        timezone = self._get_attribute('timezone', 'UTC')
-        return tz.gettz(timezone) or tz.tzutc()
+        _tz = self._get_attribute('timezone')
+        timezone = tz.gettz(_tz)
+
+        if timezone is None:
+            logger.error("Device timezone not present or invalid: %s. Defaulting to UTC", repr(_tz))
+            timezone = tz.tzutc()
+
+        return timezone
 
     def today(self) -> datetime.datetime:
-        """ Get `datetime.datetime` object representing the current day at midnight
+        """
+        Get `datetime.datetime` object representing the current day at midnight
 
         :return:
         """
@@ -200,7 +208,8 @@ context = LocalContext()
 
 
 class Intent:
-    """ An intent as loaded from the JSON file
+    """
+    An intent as loaded from the JSON file
 
     """
     name: str
@@ -233,7 +242,8 @@ class Intent:
         return response
 
     def _log_return_value(self, result):
-        """ Log intent handler result or raise ValueError.
+        """
+        Log intent handler result or raise ValueError.
 
         :param result:
         :return:
@@ -252,7 +262,8 @@ class Intent:
             raise ValueError('Unknown return value')
 
     def __call__(self, _context: Context):
-        """ Call the implementation of the intent with context argument.
+        """
+        Call the implementation of the intent with context argument.
 
         :param _context:
         """
@@ -261,28 +272,27 @@ class Intent:
         from circuitbreaker import CircuitBreakerError
 
         with start_span(f'intent_call: {self.name}') as span:
-            logger.info('Calling intent: %s', self.name)
+            logger.info('Calling intent: %s', repr(self.name))
 
-            logger.debug('Calling %s with context: %s', self.implementation.__name__, repr(_context))
+            logger.debug('Calling %s with context: %s', repr(self.implementation.__name__), repr(_context))
             try:
                 result = self.implementation(_context)
                 span.log_kv({'intent_handler_result': repr(result)})
-            except (RequestException, HTTPError, CircuitBreakerError) as ex:
-                span.log_kv({'error': str(ex)})
-                logger.exception('Exception while calling %s', self.name)
-                return self._append_push_messages(_context, Response(_('GENERIC_HTTP_ERROR_RESPONSE')))
-            except Exception as ex:
-                span.log_kv({'error': str(ex)})
-                logger.exception('Exception while calling %s', self.name)
-                return ErrorResponse(999, f'error inside {self.implementation.__name__} while handling {self.name}. '
-                                          f'Exception-type {str(type(ex))} '
-                                          f'Args: {str(ex.args)} '
-                                          f'\nPlease, check logs for details.')
+                return self._log_return_value(result)
 
-            return self._log_return_value(result)
+            except (RequestException, HTTPError, CircuitBreakerError) as ex:
+                span.log_kv({'error': repr(ex)})
+                logger.exception('Exception while calling %s: %s', repr(self.name), repr(ex))
+                return self._append_push_messages(_context, Response(_('GENERIC_HTTP_ERROR_RESPONSE')))
+
+            except Exception as ex:
+                span.log_kv({'error': repr(ex)})
+                logger.exception('Exception in %s while handling %s', repr(self.implementation.__name__), repr(self.name))
+                raise
 
     def dict(self) -> Dict:
-        """ Export as dictionary
+        """
+        Export as dictionary
 
         :return:
         """

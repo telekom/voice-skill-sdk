@@ -33,14 +33,22 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(snake_to_camel('ab_2'), 'ab2')
         self.assertEqual(snake_to_camel('a_bc'), 'aBc')
         self.assertEqual(snake_to_camel('snake_case'), 'snakeCase')
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             snake_to_camel(123)
 
     def test_camel_to_snake(self):
         self.assertEqual(camel_to_snake('Simple'), 'simple')
         self.assertEqual(camel_to_snake('SnakeCase'), 'snake_case')
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             snake_to_camel(123)
+
+    def test_camel_to_camel(self):
+        """
+        Make sure camelCased attribute names remain camelCased
+
+        @return:
+        """
+        self.assertEqual('camelCase', snake_to_camel('camelCase'))
 
 
 class TestEntityOnOff(unittest.TestCase):

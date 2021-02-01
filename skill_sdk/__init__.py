@@ -71,3 +71,5 @@ def lazy_load(
 
 K8sChecks = lazy_load('.services.k8s', 'K8sChecks')
 RequiredForReadiness = lazy_load('.services.k8s', 'required_for_readiness')
+
+# flake8: noqa

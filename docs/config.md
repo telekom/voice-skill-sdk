@@ -39,6 +39,7 @@ as JSON properties or as file glob.
 - **[skill] → version**: Skill version.
 - **[skill] → id** (optional, default: name): Skill's ID as reported back on the `info` call.
 - **[skill] → api_base** (optional, default: `/v1/<skill name>`): Base URL of endpoint.
+- **[skill] → debug** (optional boolean, default: `no`, in _development_ mode will be set to `yes`): Run the server in debug mode.
 
 #### Caller Authentication
 

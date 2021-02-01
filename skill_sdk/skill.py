@@ -16,8 +16,8 @@ from typing import Callable, Dict
 import logging.config
 
 import bottle
-from bottle import install, get, post, route, error, request, response, tob, touni, app
-from bottle import BaseRequest, HTTPResponse
+from bottle import install, get, post, route, error, request, response, tob, touni, app     # noqa: F401
+from bottle import BaseRequest, HTTPResponse                                                # noqa: F401
 
 from . import l10n
 from . import intents
@@ -32,12 +32,13 @@ FALLBACK_INTENT = 'FALLBACK_INTENT'
 
 
 def initialize(config_file: str = None, dev: bool = False, local: bool = False, cache: bool = True) -> 'Skill':
-    """ Initialize the app
+    """
+    Initialize the app
 
-          * configure logging
-          * load the intents
-          * setup the routes
-          * return default app
+        * configure logging
+        * load the intents
+        * setup the routes
+        * return default app
 
     :param config_file: read configuration from file
     :param dev:         initialize development mode
@@ -60,19 +61,21 @@ def initialize(config_file: str = None, dev: bool = False, local: bool = False, 
 
     from . import K8sChecks
     with K8sChecks('init'):
+        bottle.debug(dev)
         configure_logging()
+        set_dev_mode() if dev else setup_services()
 
         skill = app()
         if not skill.get_intents():
             raise RuntimeError("No intent handlers loaded. Check the log messages for import errors...")
 
+        logger.info("Loaded handlers: %s", list(skill.get_intents()))
+
         if not l10n.translations:
             l10n.translations = l10n.load_translations()
 
-        from . import routes      # Add standard routes
-        from . import swagger     # Add swagger route
-
-        set_dev_mode() if dev else setup_services()
+        from . import routes      # noqa: F401   Add standard routes
+        from . import swagger     # noqa: F401   Add swagger route
 
         # Copy configuration to Skill instance
         skill.config.load_dict({section: dict(config.items(section)) for section in config.sections()})
@@ -80,7 +83,7 @@ def initialize(config_file: str = None, dev: bool = False, local: bool = False, 
 
 
 def configure_logging():
-    """ Configure logging """
+    """Configure logging"""
 
     from .tracing import initialize_tracer
     from . import log
@@ -98,10 +101,8 @@ def configure_logging():
 
 
 def setup_services():
-    """ Load optional cloud services:
+    """Load optional cloud services"""
 
-    :return:
-    """
     try:
         from .services import setup_services
         return setup_services()
@@ -110,7 +111,9 @@ def setup_services():
 
 
 def set_dev_mode():
-    """ Setup `development` mode to run the skill """
+    """Setup `development` mode to run the skill"""
+
+    config.set('skill', 'debug', 'true')
 
     # Start builtin WSGIRefServer
     logger.warning("Starting bottle with WSGIRefServer. Do not use in production!")
@@ -119,7 +122,7 @@ def set_dev_mode():
 
     # Load swagger UI
     try:
-        import swagger_ui
+        import swagger_ui   # noqa: F401
     except ModuleNotFoundError:
         logger.warning("Swagger UI not found, starting without...")
 
@@ -136,16 +139,17 @@ class Skill(bottle.Bottle):
         return self._intents
 
     def intent_handler(self, name: str, error_handler: Callable = None, **kwargs) -> Callable:
-        """ Decorator to define intent implementation
+        """
+        Decorator to define intent implementation
 
-        :param name: Intent name
-        :param error_handler: Optional handler to call if conversion error occurs
+        :param name:            Intent name
+        :param error_handler:   Optional handler to call if conversion error occurs
+        :param kwargs:          Additional parameters for backward compatibility **ignored**
         :return:
         """
         def decorator(func):    # NOSONAR
-            kwargs.update(name=name)
             decorated = decorators.intent_handler(func, error_handler=error_handler)
-            intent = intents.Intent(kwargs, decorated)
+            intent = intents.Intent(name, decorated)
             if name in self._intents:
                 raise ValueError(f'Duplicate intent {name} with handler {func}')
             self._intents[name] = intent
@@ -153,7 +157,8 @@ class Skill(bottle.Bottle):
         return decorator
 
     def test_intent(self, name: str, **kwargs) -> responses.Response:
-        """ Test an intent implementation
+        """
+        est an intent implementation
 
         :param name:    Intent name
         :param kwargs:  Intent's attributes
@@ -163,7 +168,8 @@ class Skill(bottle.Bottle):
         return invoke_intent(name, skill=self, **kwargs)
 
     def run(self, **kwargs):
-        """ Start the skill service
+        """
+        Start the skill service
 
         :param kwargs:
         :return:
@@ -179,14 +185,14 @@ class Skill(bottle.Bottle):
 
 
 def run(config_file: str = None, dev: bool = False, local: bool = False, cache: bool = True, **kwargs):
-    """ Init and start the skill service """
+    """Init and start the skill service"""
 
     skill = initialize(config_file=config_file, dev=dev, local=local, cache=cache)
     skill.run(**kwargs)
 
 
 def make_default_app_wrapper(name):
-    """ Decorator to apply a property to default bottle app """
+    """Decorator to apply a property to default bottle app"""
 
     @functools.wraps(getattr(Skill, name))
     def wrapper(*args, **kwargs):   # NOSONAR

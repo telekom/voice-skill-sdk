@@ -10,7 +10,7 @@ You find the skill support "Kubernetes liveness and readiness probes" at the fol
 At this point, the liveness endpoint always returns `alive` with the status code `200`. If the skill notices it got in a state
 where it can not answer requests, it dies.
 
-If the skill is ready, the readiness probe returns `ready` with the status code `200`. If the skill is not ready to handle requests, it returns the status code `503` (service unavilable) and a list of the active readiness locks in the body.
+If the skill is ready, the readiness probe returns `ready` with the status code `200`. If the skill is not ready to handle requests, it returns the status code `503` (service unavailable) and a list of the active readiness locks in the body.
 
 ## Defining readiness locks
 

@@ -89,6 +89,11 @@ class TestIntentsContext(unittest.TestCase):
     def test_tz_functions(self):
         now = datetime.datetime(year=2100, month=12, day=19, hour=23, minute=42, tzinfo=tz.tzutc())
 
+        self.assertEqual('CET', self.ctx.gettz().tzname(now))
+        with patch.dict(self.ctx.attributes, {'timezone': ["Mars"]}), patch.object(logging.Logger, 'error') as log:
+            self.assertEqual('UTC', self.ctx.gettz().tzname(now))
+            self.assertEqual(log.call_count, 1)
+
         with mock_datetime_now(now, datetime):
             # Make sure timezone is set to "Europe/Berlin"
             self.assertEqual(self.ctx.attributes.get('timezone'), ["Europe/Berlin"])

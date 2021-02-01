@@ -14,6 +14,7 @@
 import json
 import base64
 import logging
+import traceback
 from json import dumps, JSONDecodeError
 
 from .__version__ import __version__, __spi_version__
@@ -21,7 +22,7 @@ from .config import config
 from .intents import Context, InvalidTokenError
 from .l10n import TranslationError, get_locales
 from .responses import ErrorResponse
-from .skill import app, get, post, request, response, error, HTTPResponse, tob, touni
+from .skill import app, error, get, post, request, response, tob, touni, HTTPResponse
 
 from . import log, tracing
 
@@ -29,18 +30,23 @@ logger = logging.getLogger(__name__)
 
 
 def api_base():
-    """ Get API base """
+    """Get API base"""
     return config.get('skill', 'api_base', fallback=f"/v1/{config.get('skill', 'name')}")
 
 
+def debug():
+    return config.getboolean('skill', 'debug', fallback=False)
+
+
 def authenticate(req, password):
-    """ Authenticate the request
+    """
+    Authenticate the request
 
     :param req:
     :param password:
     :return:    True if authorized
     """
-    logger.debug(f'Processing basic authentication.')
+    logger.debug('Processing basic authentication.')
     auth = req.headers.get('Authorization')
 
     try:
@@ -60,7 +66,8 @@ def authenticate(req, password):
 
 
 def auth_basic(check, text="Access denied"):
-    """ Decorator to [optionally] require basic auth
+    """
+    Decorator to [optionally] require basic auth
 
     :param check:
     :param text:
@@ -87,7 +94,7 @@ def auth_basic(check, text="Access denied"):
 
         # If authentication requested but no api_key found in config, log a warning
         if auth == 'basic' and not api_key:
-            logger.warning(f'Please set api_key in skill.conf! Proceeding without authentication....')
+            logger.warning('Please set api_key in skill.conf! Proceeding without authentication....')
 
         return func
     return decorator
@@ -96,13 +103,14 @@ def auth_basic(check, text="Access denied"):
 @get(f'{api_base()}/info')
 @auth_basic(authenticate)
 def info():
-    """ Get skill info endpoint
+    """
+    Get skill info endpoint
 
-        returns basic skill info to CVI:
-            - skill id
-            - supported SPI version
-            - skill and SDK versions
-            - supported locales
+    returns basic skill info to CVI:
+        - skill id
+        - supported SPI version
+        - skill and SDK versions
+        - supported locales
     """
 
     with tracing.start_active_span('info', request):
@@ -121,17 +129,18 @@ def info():
             logger.debug('Info request result: %s', data)
             return dumps(data)
 
-        except BaseException:
-            logger.exception('Internal error.')
+        except BaseException as ex:
+            logger.exception('Internal error: %s', repr(ex))
             return ErrorResponse(999, 'internal error').as_response()
 
 
 @post(api_base())
 @auth_basic(authenticate)
 def invoke():
-    """ Invoke intent endpoint:
+    """
+    Invoke intent endpoint:
 
-        returns intent call result or ErrorResponse
+    returns intent call result or ErrorResponse
     """
 
     with tracing.start_active_span('invoke', request) as scope:
@@ -152,19 +161,21 @@ def invoke():
         except InvalidTokenError:
             logger.exception('Invalid token.')
             result = ErrorResponse(2, 'invalid token').as_response()
-        except (TranslationError, JSONDecodeError, AttributeError, KeyError, TypeError):
-            logger.exception('Bad request.')
-            result = ErrorResponse(3, 'Bad request').as_response()
-        except BaseException:
-            logger.exception('Internal error.')
-            result = ErrorResponse(999, 'internal error').as_response()
+        except (TranslationError, JSONDecodeError, AttributeError, KeyError, TypeError) as ex:
+            logger.exception('Bad request: %s', repr(ex))
+            exc_msg = f'Exception in "invoke": {repr(ex)}. {traceback.format_exc()}' if debug() else 'Bad request'
+            result = ErrorResponse(3, exc_msg).as_response()
+        except BaseException as ex:
+            logger.exception('Exception in "invoke": %s', repr(ex))
+            exc_msg = f'Exception in "invoke": {repr(ex)}. {traceback.format_exc()}' if debug() else 'internal error'
+            result = ErrorResponse(999, exc_msg).as_response()
 
     return result
 
 
 @error(400)
 def json_400(err):
-    """ Bad request """
+    """Bad request"""
 
     logger.warning('400 raised, returning: bad request.')
     logger.debug('Error: %s', err)
@@ -173,7 +184,7 @@ def json_400(err):
 
 @error(404)
 def json_404(err):
-    """ Not found """
+    """Not found"""
 
     logger.warning('404 raised, returning: not found.')
     logger.debug('Error: %s', err)
@@ -182,7 +193,7 @@ def json_404(err):
 
 @error(500)
 def json_500(err):
-    """ Internal server error """
+    """Internal server error"""
 
     logger.warning('500 error raised, returning: internal error.')
     logger.debug('Error: %s', err)

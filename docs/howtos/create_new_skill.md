@@ -13,11 +13,11 @@ OR
 
 download and unpack a source distribution:
 ```
-pip download --no-deps --no-binary :all: skill-sdk
+pip download --no-deps --no-binary :all: skill-sdk &&
 tar xvzf skill-sdk-*.tar.gz
 ```
 
-2. Switch to the SDK directory.
+2. Change to the SDK directory.
 3. Run the command `python setup.py new_skill`.
 4. Name your skill (My Awesome Skill).
 5. Set the programming language or hit `<enter>` for Python.
@@ -44,7 +44,7 @@ This script will:
 - Add a virtual environment to `~/skills/skill-my-awesome-skill-python/.venv`.
 - Install required dependencies.
  
-Now, you can run the command `cd ~/skills/skill-my-awesome-skill-python && pipenv shell` ...
+Now, you can run the command `cd ~/skills/skill-my-awesome-skill-python && source .venv/bin/activate` ...
 
 **or**
 

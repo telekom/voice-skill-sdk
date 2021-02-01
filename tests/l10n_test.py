@@ -157,15 +157,6 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(message.args, ('0', '1'))
         self.assertEqual(message.kwargs, {})
 
-    def test_add(self):
-        m = Message('1') + ' ' + Message('2')
-        self.assertEqual('1 2', m)
-        self.assertEqual('1 2', m.key)
-        self.assertEqual('1 2', Message('1') + ' ' + '2')
-        self.assertEqual('1 2', '1' + ' ' + Message('2'))
-        with self.assertRaises(TypeError):
-            Message('1') + 1
-
     def test_strip(self):
         self.assertEqual('Message', l10n.nl_strip(Message(' !Message?!,. ')))
 

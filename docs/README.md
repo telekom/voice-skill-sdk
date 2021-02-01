@@ -9,7 +9,7 @@ This folder contains the voice skill SDK for Python documentation.
 ## Content
 
 - [Introduction](intro.md)
-- [Installation of the SDK for Development Usage](install.md)
+- [Installation of the SDK](install.md)
 - [File Structure of a Skill](skill_structure.md)
 - [End-to-end Guide for Skill Development and Implementation Voice Platform](external_developers.md)
 - [An overview to Telekom Voicification Suite](tvs.md)

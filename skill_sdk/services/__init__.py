@@ -22,7 +22,7 @@ def setup_services():
     """
     import importlib
     from ..config import config
-    from . import log
+    from . import log   # noqa: F401
 
     def setup(service_name: str):
         """ Setup service: each submodule implements the function """

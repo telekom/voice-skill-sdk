@@ -1,11 +1,10 @@
 #!/bin/bash
 
 # Use this script for local testing only
-# CI/CD test is in .gitlab-ci.yml
 
 set -e
 
-pip install -U mypy coverage
+pip install -U mypy coverage requests-mock
 
 coverage erase
 

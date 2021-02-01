@@ -53,7 +53,7 @@ def prompt_overwrite(skill_dir: Path) -> bool:
         confirm = click.confirm(f'Project directory {skill_dir} exists. Overwrite?', default=True)
         if not confirm:
             click.secho('Exiting...')
-            sys.exit(1)
+            sys.exit()
     return confirm
 
 
@@ -146,8 +146,8 @@ def create_implementation(metadata: io.BufferedReader, skill_dir: Path, extra_co
 @click.option('-o', '--out', default='~/skills', prompt='Directory to create the project',
               type=click.Path(file_okay=False), help='Directory to create the project')
 @click.option('-m', '--metadata', type=click.File('rb'), help='JSON file to read domain context metadata')
-@click.option('-v', '--verbose', help='Verbose output', hidden=True, is_flag=True)
-def venv_main(name: str, language: str, out: str, metadata: Optional[io.BufferedReader] = None, verbose: bool = False):
+@click.option('-v', '--verbose', help='Verbose output', count=True)
+def venv_main(name: str, language: str, out: str, metadata: Optional[io.BufferedReader] = None, verbose: int = 1):
 
     #
     # We'll create:
@@ -171,12 +171,16 @@ def venv_main(name: str, language: str, out: str, metadata: Optional[io.Buffered
         'programming_language': language
     })
 
-    configure_logger(stream_level='DEBUG' if verbose else 'INFO')
+    stdout = sys.stdout if verbose else open(os.devnull, 'w')
+    configure_logger(stream_level='DEBUG' if verbose > 1 else 'INFO')
 
-    start = time.time()
     # Run cookiecutter with all parameters set without prompting
-    skill_dir = cookiecutter(str(template_dir), extra_context=extra_context,
-                             output_dir=str(output_dir), overwrite_if_exists=overwrite_if_exists, no_input=True)
+    start = time.time()
+    skill_dir = cookiecutter(str(template_dir),
+                             extra_context=extra_context,
+                             output_dir=str(output_dir),
+                             overwrite_if_exists=overwrite_if_exists,
+                             no_input=True)
     cookies_time = time.time() - start
 
     # Create implementation from domain context metadata
@@ -184,12 +188,16 @@ def venv_main(name: str, language: str, out: str, metadata: Optional[io.Buffered
         create_implementation(metadata, Path(skill_dir), extra_context=extra_context)
 
     # Create virtual environment
-    stdout = sys.stdout if verbose else open(os.devnull, 'w')
-
     venv = Path(skill_dir) / VENV_DIR
     click.secho(f'Creating virtual environment in {venv}', fg='green')
     start = time.time()
-    subprocess.check_call((sys.executable, '-m', 'venv', str(venv), '--clear'), stderr=stdout, stdout=stdout)
+
+    try:
+        subprocess.check_call((sys.executable, '-m', 'venv', str(venv), '--clear'), stderr=stdout, stdout=stdout)
+    except subprocess.CalledProcessError:
+        click.secho('ERROR: creating virtual environment failed!', fg='red')
+        click.secho('Some distros might require `python3-venv` package installed.', fg='yellow')
+        raise
 
     # Install SDK in "editable" mode
     click.secho(f'Installing skill SDK for Python', fg='green')

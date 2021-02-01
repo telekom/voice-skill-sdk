@@ -61,6 +61,7 @@ class TestSetupServices(unittest.TestCase):
 
 
 class TestBaseService(unittest.TestCase):
+
     def test_url(self):
         service = BaseService()
         service.BASE_URL = 'http://service-text-service:1555/v1/base'
@@ -69,3 +70,8 @@ class TestBaseService(unittest.TestCase):
         self.assertEqual(service.url, 'http://service-text-service:1555/services/base/api/v1')
         service.BASE_URL = 'http://service-text-service:1555/'
         self.assertEqual(service.url, 'http://service-text-service:1555/v0/base')
+
+    def test_no_base_url(self):
+        b = BaseService()
+        with self.assertRaises(ValueError):
+            self.assertEqual(b.url, None)

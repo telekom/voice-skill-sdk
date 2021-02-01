@@ -99,10 +99,10 @@ def create_spec(swagger_template=pathlib.Path(HERE / 'swagger.yml')):
 
     intents: Dict[str, Intent] = app().get_intents()
 
-    security = ([{'BasicAuth': ['read', 'write']}]
-                if config.get('skill', 'auth', fallback=None) == 'basic'
-                   and config.get('skill', 'api_key', fallback=None)
-                else [])
+    auth_requested = bool(config.get('skill', 'auth', fallback=None) == 'basic'
+                          and config.get('skill', 'api_key', fallback=None))
+
+    security = [{'BasicAuth': ['read', 'write']}] if auth_requested else []
 
     try:
 

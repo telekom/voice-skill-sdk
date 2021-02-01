@@ -28,27 +28,11 @@ logger = logging.getLogger(__name__)
 DEFAULT_SERVICE_TIMEOUT = 10
 
 
-class MalformedResponseException(Exception):
-    """ Raised if a service returns a malformed response,
-        e.g. you request JSON and service returns <html></html> """
-
-    def __init__(self, message, service: 'BaseService') -> None:
-        """
-        :param message: Exception message
-        :param service:
-        """
-        super().__init__(message)
-        self.message = message
-        self.service = service
-
-    def __repr__(self):
-        return f'MalformedResponseException in service [{self.service.NAME}]: {self.message}'
-
-    __str__ = __repr__
-
-
 class BaseService:
-    """ The base for internal services """
+    """
+    The base for internal services
+
+    """
 
     # Service URL
     BASE_URL: Optional[str] = None

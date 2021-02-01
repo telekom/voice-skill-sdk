@@ -18,7 +18,6 @@ import argparse
 import unittest
 import importlib
 from typing import Dict, List
-from coverage import Coverage
 
 from .config import config
 
@@ -31,10 +30,13 @@ logger = logging.getLogger(__name__)
 
 
 def create_coverage():
-    """ Create Coverage instance
+    """
+    Create Coverage instance
 
     :return:
     """
+    from coverage import Coverage
+
     include = config.get('tests', 'include', fallback='./*, impl/*, src/*')
     include = [_.strip() for line in include.splitlines() for _ in line.split(',') if line and _]
 
@@ -50,7 +52,8 @@ def create_coverage():
 
 
 def run_tests(functional: bool = False, cover: bool = False):
-    """ Discover and run an included unittest suite
+    """
+    Discover and run an included unittest suite
 
     :param functional:  start automatic functional test
     :param cover:       display coverage report
@@ -76,8 +79,9 @@ def run_tests(functional: bool = False, cover: bool = False):
 
 
 def run_unit_tests() -> bool:
-    """ Discover and run integrates unit tests:
-            unit tests are expected in `tests` directory, and following `*_test.py` file naming convention by default
+    """
+    Discover and run integrates unit tests:
+        unit tests are expected in `tests` directory, and following `*_test.py` file naming convention by default
 
     """
 
@@ -93,9 +97,10 @@ def run_unit_tests() -> bool:
 
 
 def run_func_tests() -> bool:
-    """ Run functional tests:
-            get the skill intents, start the skill in development mode
-            and read the skill responses supplying different (both correct and incorrect) entity values
+    """
+    Run functional tests:
+        get the skill intents, start the skill in development mode
+        and read the skill responses supplying different (both correct and incorrect) entity values
 
     :return:
     """
@@ -113,7 +118,8 @@ def run_func_tests() -> bool:
 
 
 def import_module(module: str) -> None:
-    """ Import from either python file or directory, silently ignoring import exceptions
+    """
+    Import from either python file or directory, silently ignoring import exceptions
 
     :param module:
     :return:
@@ -134,7 +140,8 @@ def import_module(module: str) -> None:
 
 
 def _download_full_catalog(download_url: str, token: str = None, tenant: str = None) -> Dict:
-    """ Download a complete translation catalog from text service
+    """
+    Download a complete translation catalog from text service
 
     :param download_url:
     :param token:
@@ -158,9 +165,8 @@ def translate_modules(modules: List[str],
                       download_url: str = None,
                       token: str = None,
                       tenant: str = None):
-    """ Create translation template and load translations from text service (if URL is given)
-        Changed in 1.3.7: exit with non-zero exit code if `download_url` not specified
-        Changed in 1.5.2: translations are compiled after loading
+    """
+    Create translation template and load translations from text service (if URL is given)
 
     :param modules: List of Python modules to scan
     :param force:   Overwrite existing translations if exist
@@ -198,7 +204,9 @@ def translate_modules(modules: List[str],
 
 
 def manage():
-    """ Entry point """
+    """
+    Entry point
+    """
 
     parser = argparse.ArgumentParser(prog='manage.py',
                                      description="helper for several Smart Voice Hub related skill tasks")
@@ -275,7 +283,8 @@ def manage():
 
 
 def patch():
-    """ We use gevent, so try to monkey-patch as early as possible (http://www.gevent.org/api/gevent.monkey.html).
+    """
+    We use gevent, so try to monkey-patch as early as possible (http://www.gevent.org/api/gevent.monkey.html).
 
         If your skill is using one of these modules or anything that depends on them,
             consider `monkey.patch_all()` at the very start of your app:

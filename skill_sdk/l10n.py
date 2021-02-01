@@ -16,7 +16,7 @@ import pathlib
 import logging
 import subprocess
 from threading import local
-from typing import Dict, Iterable, Iterator, Generator, List, Mapping, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Mapping, Optional, Tuple, Union
 from gettext import NullTranslations, GNUTranslations
 
 from .config import config
@@ -24,8 +24,8 @@ from .config import config
 _thread_locals = local()
 
 LOCALE_DIR = 'locale'
+PROGRAM_NOT_FOUND = 'Failed to launch %s: not found. Make sure you have GNU gettext tools installed.'
 RE_TRANSLATIONS = re.compile(r'^[a-z]{2}(-[A-Z]{2})?$')
-EXTRACT_TRANSLATIONS_ERROR: str = 'Failed to extract translations: %s'
 logger = logging.getLogger(__name__)
 
 
@@ -33,15 +33,13 @@ translations: Mapping[str, Union['Translations', NullTranslations]] = {}
 
 
 def get_locales() -> List[str]:
-    """ Get list of available locales, eg. ['de', 'fr']
-    """
+    """Get list of available locales, eg. ['de', 'fr']"""
 
     return list(translations.keys())
 
 
 def get_translation(locale: str) -> Union['Translations', NullTranslations]:
-    """ Get translation for locale, or empty translation if does not exist
-    """
+    """Get translation for locale, or empty translation if does not exist"""
 
     global translations
     if locale not in translations:
@@ -51,13 +49,13 @@ def get_translation(locale: str) -> Union['Translations', NullTranslations]:
 
 
 def set_current_locale(locale):
-    """ Set current locale
-    """
+    """Set current locale"""
     return setattr(_thread_locals, 'locale', locale)
 
 
 def make_lazy(locale, func, alt=None):
-    """ Make lazy translation function
+    """
+    Make lazy translation function
 
     :param locale:  current locale
     :param func:    function to call
@@ -65,7 +63,8 @@ def make_lazy(locale, func, alt=None):
     :return:
     """
     def lazy_func(*args, **kwargs):
-        """ Lazy translations wrapper """
+        """
+        Lazy translations wrapper """
         try:
             return getattr(locale(), func)(*args, **kwargs)
         except AttributeError:
@@ -82,7 +81,8 @@ _a = make_lazy(lambda: _thread_locals.locale, 'getalltexts', lambda m, *a, **kw:
 
 
 def nl_capitalize(string: str):
-    """ Capitalize first character (the rest is untouched)
+    """
+    Capitalize first character (the rest is untouched)
 
     :param string:
     :return:
@@ -91,7 +91,8 @@ def nl_capitalize(string: str):
 
 
 def nl_decapitalize(string: str):
-    """ Decapitalize first character (the rest is untouched)
+    """
+    Decapitalize first character (the rest is untouched)
 
     :param string:
     :return:
@@ -100,7 +101,8 @@ def nl_decapitalize(string: str):
 
 
 def nl_strip(string: str) -> str:
-    """ Strip blanks and punctuation symbols
+    """
+    Strip blanks and punctuation symbols
 
     :param string:
     :return:
@@ -110,14 +112,15 @@ def nl_strip(string: str) -> str:
 
 class TranslationError(Exception):
     """
-    Exception raises when a translation could not be performed due to a missing ``.mo`` file, a missing translation
+    Exception raised when a translation could not be performed due to a missing ``.mo`` file, a missing translation
     key or if there are no suitable translations available in the text service.
     """
 
 
 class Message(str):
-    """ Artificial `string` object that looks like a string, behaves like a string and formats like a string,
-        but encapsulates the original `key` and format arguments for use in `responses.Result`
+    """
+    String object that looks like a string and formats like a string,
+    but encapsulates the original `key` and format arguments for use in `responses.Result`
 
     """
 
@@ -131,7 +134,8 @@ class Message(str):
     kwargs: Dict
 
     def __new__(cls, value, key=None, *args, **kwargs):
-        """ Create a message with msgstr/msgid and format parameters
+        """
+        Create a message with msgstr/msgid and format parameters
 
         :return:
         """
@@ -144,57 +148,17 @@ class Message(str):
         return string
 
     def format(self, *args, **kwargs) -> 'Message':
-        """ Create and return new Message object with given format parameters
+        """
+        Create and return new Message object with given format parameters
 
         :return:
         """
         message = Message(self.value, self.key, *args, **kwargs)
         return message
 
-    def __add__(self, other: Union['Message', str]) -> 'Message':
-        """ Concatenate messages (or Message and str)
-
-        @param other:
-        @return:
-        """
-        key = self.key + (other.key if isinstance(other, Message) else other)
-        message = Message('{0}{1}', key, self, other)
-        return message
-
-    def __radd__(self, other):
-        """ Concatenate str and Message
-
-        @param other:
-        @return:
-        """
-        key = other + self.key
-        message = Message('{0}{1}', key, other, self)
-        return message
-
-    def __join(self, __generator: Generator['Message', None, None], __result: 'Message' = None) -> 'Message':
-        """ Join items in generator
-
-        @param __generator:
-        @param __result:
-        @return:
-        """
-        try:
-            __result = __result or next(__generator)
-            __result += self + next(__generator)
-            return self.__join(__generator, __result)
-        except StopIteration:
-            return __result if __result is not None else Message('')
-
-    def join(self, __iterable: Iterable[str]) -> 'Message':
-        """ Join messages in iterable and return a concatenated Message.
-
-        @param __iterable:
-        @return:
-        """
-        return self.__join(__iterable if isinstance(__iterable, Generator) else (_ for _ in __iterable))
-
     def strip(self, __chars: Optional[str] = None) -> 'Message':
-        """ Return new Message object with stripped value
+        """
+        Return new Message object with stripped value
 
         :return:
         """
@@ -203,8 +167,9 @@ class Message(str):
 
 
 class Translations(GNUTranslations):
-    """ Lazy translations with an empty catalog
-            dissembles gettext.NullTranslations if no translation available
+    """
+    Lazy translations with an empty catalog
+        dissembles gettext.NullTranslations if no translation available
     """
 
     def __init__(self, fp=None):
@@ -220,8 +185,9 @@ class Translations(GNUTranslations):
         return Message(super().ngettext(singular, plural, n), message, *args, **kwargs)
 
     def nl_join(self, elements: List[str]) -> str:
-        """ Join a list in natural language:
-                [items, item2, item3] -> 'item1, item2 and item3'
+        """
+        Join a list in natural language:
+            [items, item2, item3] -> 'item1, item2 and item3'
 
         :param elements:
         :return:
@@ -238,8 +204,9 @@ class Translations(GNUTranslations):
         return result
 
     def nl_build(self, header: str, elements: List[str] = None) -> str:
-        """ Build list in natural language:
-                (header, [items, item2, item3]) -> 'Header: item1, item2 and item3.'
+        """
+        Build list in natural language:
+            (header, [items, item2, item3]) -> 'Header: item1, item2 and item3.'
 
         :param header:      list header
         :param elements:    list elements
@@ -269,19 +236,21 @@ class Translations(GNUTranslations):
 #
 
 def get_locale_dir(locale_dir: str = None) -> pathlib.Path:
-    """ Returns locales folder location """
+    """Returns locales folder location"""
     path = pathlib.Path(locale_dir or LOCALE_DIR)
     return path
 
 
 def extract_translations(modules: List[str], locale_dir: str = None) -> Optional[pathlib.Path]:
-    """ Extract translatable strings from Python modules and write translations to `messages.pot`
+    """
+    Extract translatable strings from Python modules and write translations to `messages.pot`
 
     :param modules: List of Python modules to scan
     :param locale_dir:
     :return:
     """
     files = []
+    program = 'xgettext'
     path = get_locale_dir(locale_dir)
     if not path.exists():
         path.mkdir(parents=True)
@@ -296,19 +265,22 @@ def extract_translations(modules: List[str], locale_dir: str = None) -> Optional
 
     logger.debug('Scanning %s', repr(files))
     try:
-        subprocess.run(['xgettext', '--language=python', f'--output={str(output)}', *files],
+        subprocess.run([program, '--language=python', f'--output={str(output)}', *files],
                        check=True, stderr=subprocess.PIPE, text=True)
         logger.info('Translation template written to %s', repr(output))
         return output
+
+    except FileNotFoundError:
+        logger.error(PROGRAM_NOT_FOUND, program)
+
     except subprocess.CalledProcessError as ex:
-        logger.error(EXTRACT_TRANSLATIONS_ERROR, repr(ex.stderr))
-    except FileNotFoundError as ex:
-        logger.error(EXTRACT_TRANSLATIONS_ERROR, repr(ex))
+        logger.error('Failed to extract translations: %s', repr(ex.stderr))
     return None
 
 
 def init_locales(template: pathlib.Path, locales: List[str], locale_dir: str = None, force: bool = False) -> bool:
-    """ Create empty .po file in locale_dir
+    """
+    Create empty .po file in locale_dir
 
     :param template:    Template (.pot) file to create translation
     :param locales:     List of translations to initialize, eg. ['en', 'de', 'fr']
@@ -317,7 +289,7 @@ def init_locales(template: pathlib.Path, locales: List[str], locale_dir: str = N
 
     :return:            `True` if all locales have been initialized, `False` if error occurred
     """
-    result = True
+    program = 'msginit'
     path = get_locale_dir(locale_dir)
     for locale in locales:
         output = path / f'{locale}.po'
@@ -325,19 +297,23 @@ def init_locales(template: pathlib.Path, locales: List[str], locale_dir: str = N
         try:
             if force and output.exists():
                 output.unlink()
-            subprocess.run(['msginit', '--no-translator', '-i', template, '-o', str(output)],
+            subprocess.run([program, '--no-translator', '-i', template, '-o', str(output)],
                            check=True, stderr=subprocess.PIPE, text=True)
+
+        except FileNotFoundError:
+            logger.error(PROGRAM_NOT_FOUND, program)
+            return False
+
         except subprocess.CalledProcessError as ex:
-            result = False
             logger.error('Failed to create %s: %s', repr(output), repr(ex.stderr))
-        except FileNotFoundError as ex:
-            result = False
-            logger.error(EXTRACT_TRANSLATIONS_ERROR, repr(ex))
-    return result
+            return False
+
+    return True
 
 
 def _translate(lines: Iterator, messages: Dict) -> List:
-    """ Update lines from .po file with translated messages dict
+    """
+    Update lines from .po file with translated messages dict
 
     :param lines:
     :param messages:
@@ -365,7 +341,8 @@ def _translate(lines: Iterator, messages: Dict) -> List:
 
 
 def translate_locale(locale: str, messages: Dict, locale_dir: str = None) -> Optional[List]:
-    """ Read data from .po file and update it with translated messages
+    """
+    Read data from .po file and update it with translated messages
 
     :param locale:
     :param messages:
@@ -374,7 +351,7 @@ def translate_locale(locale: str, messages: Dict, locale_dir: str = None) -> Opt
     """
     po_file = get_locale_dir(locale_dir) / f'{locale}.po'
     try:
-        logger.info(f'Translating %s ...', po_file.name)
+        logger.info('Translating %s ...', po_file.name)
         with po_file.open() as f:
             lines = iter(f.readlines())
             return _translate(lines, messages)
@@ -384,7 +361,8 @@ def translate_locale(locale: str, messages: Dict, locale_dir: str = None) -> Opt
 
 
 def update_translation(locale: str, messages: Dict, locale_dir: str = None):
-    """ Update .po file with translated messages
+    """
+    Update .po file with translated messages
 
     :param locale:
     :param messages:
@@ -403,28 +381,31 @@ def update_translation(locale: str, messages: Dict, locale_dir: str = None):
 
 
 def compile_locales(locale_dir: str = None):
-    """ Compile all languages available in locale_dir:
+    """
+    Compile all languages available in locale_dir:
         launches `msgfmt` utility to compile .po to .mo files
 
     :param locale_dir:
     :return:
     """
+    program = 'msgfmt'
     search_glob = get_locale_dir(locale_dir) / '*.po'
     for po_file in config.resolve_glob(search_glob):
         logger.info('Compiling %s ...', po_file.name)
         try:
-            subprocess.run(['msgfmt', '-o', str(po_file.with_suffix('.mo')),
+            subprocess.run([program, '-o', str(po_file.with_suffix('.mo')),
                             str(po_file)], check=True, stderr=subprocess.PIPE, text=True)
 
         except FileNotFoundError:
-            logger.error('Failed to compile %s: file not found', po_file.name)
+            logger.error(PROGRAM_NOT_FOUND, program)
 
         except subprocess.CalledProcessError as ex:
             logger.error('Failed to compile %s: %s', po_file.name, repr(ex.stderr))
 
 
 def load_translations(locale_dir: str = None) -> Mapping[str, Translations]:
-    """ Load local languages available in locale_dir
+    """
+    Load local languages available in locale_dir
 
     :param locale_dir:
     :return:

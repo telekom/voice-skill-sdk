@@ -14,7 +14,7 @@ Hereafter, you find a full overview of the commands' syntax:
     python[3]  manage.py [-h] [-l] [-t] [-d] {run,test,version,translate}
 
 	positional arguments:
-	  {run,test,version,intents}
+	  {run,test,version,translate}
 	    run                 Run the HTTP server
 	    test                Runs tests
 	    version             Print version
@@ -63,12 +63,23 @@ The global argument `--local` (or short `-l`) injects a proxy configuration into
 
 #### Global argument `--dev` (`-t`)
 
-The global argument `--dev` (or short `-t`) activates the development mode. 
-This mode is using integrated WSGIRefServer for deployment so the micro-service can be developed in Windows environment.
+The global argument `--dev` (or short `-t`) activates the [development](#development) mode. 
 
 #### Global argument `--no-cache` (`-d`)
 
 Disable local cache adapters (intended mainly for debugging purposes) 
+
+## <div id="development">Development mode</div>
+
+When skill is being deployed in _development mode_, it uses integrated [WSGIRefServer](https://docs.python.org/3/library/wsgiref.html#module-wsgiref.simple_server), 
+so that the micro-service can be developed in Windows environment.
+
+Activating this mode also loads Swagger UI if available 
+and makes the web server bind to a _localhost_ (**127.0.0.1**) only,
+so that the service is not available for requests from outside.
+
+> **Note:** _WSGIRefServer_ is intended for development purpose only: 
+> it can process a single request at a time, and cannot handle regular production load.  
 
 ## Expose the application object to a WSGI-server
 

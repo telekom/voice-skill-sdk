@@ -14,7 +14,7 @@
 import logging
 import opentracing
 from opentracing import global_tracer, set_global_tracer
-from opentracing import InvalidCarrierException, UnsupportedFormatException, SpanContextCorruptedException  # NOSONAR
+from opentracing import InvalidCarrierException, UnsupportedFormatException, SpanContextCorruptedException  # noqa: F401
 from opentracing.propagation import Format
 from functools import wraps
 

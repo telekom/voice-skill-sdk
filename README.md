@@ -40,7 +40,9 @@ Requires Python 3.7! [Type hints](https://docs.python.org/3/library/typing.html)
 
 **Remark**
 
-This repository uses the `*_test.py` naming schema. PyCharm discovers everything automatically. But if you like to invoke unit tests from the command line, and you are not sure about how, please check `scripts/test`.
+This repository uses the `*_test.py` naming schema. 
+PyCharm discovers everything automatically, yet if you like to invoke unit tests from the command line, 
+please use `scripts/test`.
 
 ### Quickstart
 

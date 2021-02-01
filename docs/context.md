@@ -40,6 +40,33 @@ To get device-local date and time, the following shorthand methods are available
 - `Context.today()`: returns the current device-local date (current day at midnight)
 
 Both methods return `datetime.datetime` value with `datetime.tzinfo`
+
+The timezone must be provided by as an attribute to the intent, which can be automated in the intent configuration like this:
+
+**Example**
+
+CVI configuration for minimum MYINTENT intent getting timezone of the device as a parameter.
+
+```json
+    {
+      "name": "MYINTENT",
+      "entityFiller": "",
+      "entities": [
+        {
+          "name": "timezone",
+          "type": "TIMEZONE",
+          "fillPolicy": [
+            "device"
+          ],
+          "useFromSession": true
+        }
+      ],
+      "prompts": [],
+      "requiredTokens": [],
+      "errors": []
+    }
+```
+
  
 ## Detailed information about specific attributes
 

@@ -185,7 +185,7 @@ class TestInvoke(unittest.TestCase):
                 patch.object(skill_sdk.skill.Skill, '_intents', new={'TELEKOM_Demo_Intent': intent}):
             from skill_sdk.routes import invoke
             result = invoke()
-        self.assertEqual(result.status_code, 500)
+        self.assertEqual(result.status_code, 400)
 
     def test_invoke_no_context(self):
         intent = self.intent
