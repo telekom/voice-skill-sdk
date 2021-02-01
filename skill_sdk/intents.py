@@ -204,6 +204,27 @@ class Context:
             return _today
 
 
+    def _str_remove_punctuation(self, text:str, removable:str = ",.;?!") -> str:
+        """ remove any character from text which is in removable
+        """
+        return ''.join([_ for _ in text if _ not in removable])
+
+    def is_text_including_words(self, words:[str], attr:str = 'stt_text') -> bool:
+        """ is any word of the list included in the text of attribute attr
+            if no entity name is provided, the entity 'stt_text' is used
+            a word needs to be exact and lonely  "i lived in duisburg" neither include the word 'live' nor the word 'burg' but once 'i' at the beginning
+        """
+        _text = self._get_attribute(attr)
+        if _text:
+            _text = self._str_remove_punctuation(_text).lower()
+            starts = any(_text.startswith(sub + " ") for sub in words)
+            between = any((" " + sub + " ") in _text for sub in words)
+            ends = any(_text.endswith(" " + sub) for sub in words)
+            return starts or between or ends
+        else:
+            return False
+
+
 class LocalContext(Context):
     """ Thread-local Context object """
 

@@ -150,3 +150,17 @@ class TestIntentsContext(unittest.TestCase):
                 #check fall back to today
                 self.ctx.attributes["date"] = []
                 self.assertEqual(self.ctx.closest_next_date(), self.ctx.now().date())
+
+    def test_str_remove_punctuation(self):
+        self.assertEqual(self.ctx._str_remove_punctuation("a.2 .h,b!e?,t;"), "a2 hbet")
+        self.assertEqual(self.ctx._str_remove_punctuation("a.2 .h,b!e?,t;", removable="."), "a2 h,b!e?,t;")
+
+    def test_is_text_including_words(self):
+        self.ctx.attributes["stt_text"] = ["Welches Datum war am Montag?"]
+        self.assertEqual(self.ctx.is_text_including_words(["war","gewesen"]), True)
+        self.ctx.attributes["stt_text"] = ["Welches Datum ist am Montag gewesen?"]
+        self.assertEqual(self.ctx.is_text_including_words(["war", "gewesen"]), True)
+        self.ctx.attributes["stt_text"] = ["Gestern gabe es eine Warnung"]
+        self.assertEqual(self.ctx.is_text_including_words(["war", "gewesen"]), False)
+        self.ctx.attributes["stt_text"] = ["Wir waren gestern im Kino"]
+        self.assertEqual(self.ctx.is_text_including_words(["war", "gewesen"]), False)
