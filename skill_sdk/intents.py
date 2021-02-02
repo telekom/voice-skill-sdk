@@ -20,7 +20,7 @@ from typing import Any, Dict, Callable
 from collections import defaultdict
 from dateutil.tz import tz
 
-from .l10n import _, get_translation, set_current_locale
+from .l10n import _, get_translation, set_current_locale, nl_strip
 from .tracing import start_span
 from .responses import ErrorResponse, Response
 from .sessions import Session
@@ -204,11 +204,6 @@ class Context:
             return _today
 
 
-    def _str_remove_punctuation(self, text:str, removable:str = ",.;?!") -> str:
-        """ remove any character from text which is in removable
-        """
-        return ''.join([_ for _ in text if _ not in removable])
-
     def is_text_including_words(self, words:[str], attr:str = 'stt_text') -> bool:
         """ is any word of the list included in the text of attribute attr
             if no entity name is provided, the entity 'stt_text' is used
@@ -216,7 +211,7 @@ class Context:
         """
         _text = self._get_attribute(attr)
         if _text:
-            _text = self._str_remove_punctuation(_text).lower()
+            _text = nl_strip(_text).lower()
             starts = any(_text.startswith(sub + " ") for sub in words)
             between = any((" " + sub + " ") in _text for sub in words)
             ends = any(_text.endswith(" " + sub) for sub in words)
