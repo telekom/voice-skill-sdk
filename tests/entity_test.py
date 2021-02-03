@@ -20,7 +20,15 @@ from skill_sdk import entities; importlib.reload(entities)
 
 from skill_sdk.entities import Location, Device, TimeRange, TimeSet, AttributeV2
 from skill_sdk.entities import snake_to_camel, camel_to_snake, on_off_to_boolean, rank, convert
+from skill_sdk.entities import closest_previous_date, closest_next_date
 from skill_sdk.test_helpers import create_context, mock_datetime_now
+from skill_sdk.intents import Context
+from dateutil import tz
+from unittest.mock import patch
+import os
+
+import logging
+logger = logging.getLogger(__name__)
 
 l10n.translations = {'de': l10n.Translations()}
 
@@ -85,6 +93,35 @@ class TestEntityDateList(unittest.TestCase):
         self.assertEqual(len(between_list), 2)
         self.assertEqual(datetime.date(year=1980, month=2, day=27), between_list[0])
         self.assertEqual(datetime.date(year=1980, month=2, day=28), between_list[1])
+
+
+    def test_previous_date_functions(self):
+        datelist = [datetime.date(year=1980, month=2, day=27),
+                    datetime.date(year=1980, month=1, day=27),
+                    datetime.date(year=1980, month=2, day=28),
+                    datetime.date(year=1980, month=3, day=27),
+                    datetime.date(year=1981, month=2, day=27),
+                    datetime.date(year=1979, month=2, day=27)]
+
+        now = datetime.date(year=1980, month=2, day=27)
+        self.assertEqual(closest_previous_date(datelist=datelist, date=now), datetime.date(year=1980, month=1, day=27))
+        #check fall back to today
+        datelist = []
+        self.assertEqual(closest_previous_date(datelist=datelist, date=now), now)
+
+    def test_next_date_functions(self):
+        datelist = [datetime.date(year=1980, month=2, day=27),
+                    datetime.date(year=1980, month=1, day=27),
+                    datetime.date(year=1980, month=2, day=28),
+                    datetime.date(year=1980, month=3, day=27),
+                    datetime.date(year=1981, month=2, day=27),
+                    datetime.date(year=1979, month=2, day=27)]
+
+        now = datetime.date(year=1980, month=2, day=28)
+        self.assertEqual(closest_next_date(datelist=datelist,date=now),datetime.date(year=1980, month=3, day=27))
+        #check fall back to today
+        datelist = []
+        self.assertEqual(closest_next_date(datelist=datelist,date=now), now)
 
 
 class TestEntityOnOff(unittest.TestCase):

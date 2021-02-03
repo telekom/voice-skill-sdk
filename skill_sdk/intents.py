@@ -176,34 +176,6 @@ class Context:
         return datetime.datetime.now(datetime.timezone.utc).astimezone(timezone)
 
 
-    def closest_previous_date(self, attr:str ='date') -> datetime.date:
-        """ get the closest past date from an entity to today
-            if no entity name is provided, the entity 'date' is used
-            if no past date is found, the current date is returned.
-        """
-        _datelist = self.attributes.get(attr, [])
-        _today = self.now().date()
-        _past_dates = filter_date_list(_datelist,before=_today)
-        if len(_past_dates)>0:
-            return _past_dates[-1]
-        else:
-            return _today
-
-
-    def closest_next_date(self, attr:str ='date') -> datetime.date:
-        """ get the closest future date from an entity to today
-            if no entity name is provided, the entity 'date' is used
-            if no future date is found, the current date is returned.
-        """
-        _datelist = self.attributes.get(attr, [])
-        _today = self.now().date()
-        _future_dates = filter_date_list(_datelist,after=_today)
-        if len(_future_dates)>0:
-            return _future_dates[0]
-        else:
-            return _today
-
-
     def is_text_including_words(self, words:[str], attr:str = 'stt_text') -> bool:
         """ is any word of the list included in the text of attribute attr
             if no entity name is provided, the entity 'stt_text' is used
@@ -212,9 +184,8 @@ class Context:
         _text = self._get_attribute(attr)
         if _text:
             _text = nl_strip(_text).lower()
-            starts = any(_text.startswith(sub + " ") for sub in words)
-            between = any((" " + sub + " ") in _text for sub in words)
-            ends = any(_text.endswith(" " + sub) for sub in words)
+            stripped = _text.split(' ')
+            return any(_ in stripped for _ in words)
             return starts or between or ends
         else:
             return False

@@ -44,6 +44,28 @@ def filter_date_list(datelist: List[datetime.date], after: datetime.date = datet
     return sorted( (d for d in datelist if after < d < before), key=to_integer)
 
 
+def closest_next_date(datelist: List[datetime.date], date: datetime.date) -> datetime.date:
+    """ get the closest future date from an entity to a given date
+        if no future date is found, the current date is returned.
+    """
+    _future_dates = filter_date_list(datelist,after=date)
+    if len(_future_dates) > 0:
+        return _future_dates[0]
+    else:
+        return date
+
+
+def closest_previous_date(datelist: List[datetime.date], date: datetime.date) -> datetime.date:
+    """ get the closest past date from an entity to a given date
+        if no past date is found, the current date is returned.
+    """
+    _past_dates = filter_date_list(datelist,before=date)
+    if len(_past_dates) > 0:
+        return _past_dates[-1]
+    else:
+        return date
+
+
 def snake_to_camel(name):
     """ Convert snake_case to CamelCase
 
