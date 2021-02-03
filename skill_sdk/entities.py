@@ -20,6 +20,8 @@ from dateutil import parser, rrule
 from dateutil.tz import tzutc, gettz
 import isodate
 
+from .l10n import nl_strip
+
 logger = logging.getLogger(__name__)
 T = TypeVar('T')
 
@@ -64,6 +66,19 @@ def closest_previous_date(datelist: List[datetime.date], date: datetime.date) ->
         return _past_dates[-1]
     else:
         return date
+
+
+def is_text_including_words(words:[str], text: str) -> bool:
+    """ is any word of the list included in the text of attribute attr
+        if no entity name is provided, the entity 'stt_text' is used
+        a word needs to be exact and lonely  "i lived in duisburg" neither include the word 'live' nor the word 'burg' but once 'i' at the beginning
+    """
+    if text:
+        _text = nl_strip(text).lower()
+        stripped = _text.split(' ')
+        return any(_ in stripped for _ in words)
+    else:
+        return False
 
 
 def snake_to_camel(name):

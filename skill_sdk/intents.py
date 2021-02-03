@@ -20,11 +20,10 @@ from typing import Any, Dict, Callable
 from collections import defaultdict
 from dateutil.tz import tz
 
-from .l10n import _, get_translation, set_current_locale, nl_strip
+from .l10n import _, get_translation, set_current_locale
 from .tracing import start_span
 from .responses import ErrorResponse, Response
 from .sessions import Session
-from skill_sdk.entities import filter_date_list
 
 logger = logging.getLogger(__name__)
 
@@ -174,21 +173,6 @@ class Context:
         """
         timezone = self.gettz()
         return datetime.datetime.now(datetime.timezone.utc).astimezone(timezone)
-
-
-    def is_text_including_words(self, words:[str], attr:str = 'stt_text') -> bool:
-        """ is any word of the list included in the text of attribute attr
-            if no entity name is provided, the entity 'stt_text' is used
-            a word needs to be exact and lonely  "i lived in duisburg" neither include the word 'live' nor the word 'burg' but once 'i' at the beginning
-        """
-        _text = self._get_attribute(attr)
-        if _text:
-            _text = nl_strip(_text).lower()
-            stripped = _text.split(' ')
-            return any(_ in stripped for _ in words)
-            return starts or between or ends
-        else:
-            return False
 
 
 class LocalContext(Context):

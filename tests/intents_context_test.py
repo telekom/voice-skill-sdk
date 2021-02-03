@@ -112,14 +112,3 @@ class TestIntentsContext(unittest.TestCase):
                 self.assertEqual(local_today.day, 20)
                 self.assertEqual(local_today.hour, 0)
                 self.assertEqual(local_today.minute, 0)
-
-
-    def test_is_text_including_words(self):
-        self.ctx.attributes["stt_text"] = ["Welches Datum war am Montag?"]
-        self.assertEqual(self.ctx.is_text_including_words(["war","gewesen"]), True)
-        self.ctx.attributes["stt_text"] = ["Welches Datum ist am Montag gewesen?"]
-        self.assertEqual(self.ctx.is_text_including_words(["war", "gewesen"]), True)
-        self.ctx.attributes["stt_text"] = ["Gestern gabe es eine Warnung"]
-        self.assertEqual(self.ctx.is_text_including_words(["war", "gewesen"]), False)
-        self.ctx.attributes["stt_text"] = ["Wir waren gestern im Kino"]
-        self.assertEqual(self.ctx.is_text_including_words(["war", "gewesen"]), False)

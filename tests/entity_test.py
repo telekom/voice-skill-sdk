@@ -20,12 +20,8 @@ from skill_sdk import entities; importlib.reload(entities)
 
 from skill_sdk.entities import Location, Device, TimeRange, TimeSet, AttributeV2
 from skill_sdk.entities import snake_to_camel, camel_to_snake, on_off_to_boolean, rank, convert
-from skill_sdk.entities import closest_previous_date, closest_next_date
+from skill_sdk.entities import closest_previous_date, closest_next_date, is_text_including_words, get_entity
 from skill_sdk.test_helpers import create_context, mock_datetime_now
-from skill_sdk.intents import Context
-from dateutil import tz
-from unittest.mock import patch
-import os
 
 import logging
 logger = logging.getLogger(__name__)
@@ -123,6 +119,15 @@ class TestEntityDateList(unittest.TestCase):
         datelist = []
         self.assertEqual(closest_next_date(datelist=datelist,date=now), now)
 
+class TestEntityWordsInText(unittest.TestCase):
+
+    def test_is_text_including_words(self):
+        self.assertEqual(is_text_including_words(words=["war", "gewesen"], text=get_entity(["Welches Datum war am Montag?"])), True)
+        self.assertEqual(is_text_including_words(words=["war", "gewesen"], text=get_entity(["Welches Datum ist am Montag gewesen?"])), True)
+        self.assertEqual(is_text_including_words(words=["war", "gewesen"], text=get_entity(["Gestern gabe es eine Warnung"])), False)
+        self.assertEqual(is_text_including_words(words=["war", "gewesen"], text=get_entity(["Wir waren gestern im Kino"])), False)
+        self.assertEqual(is_text_including_words(words=["war", "gewesen"], text=get_entity([])), False)
+        self.assertEqual(is_text_including_words(words=["war", "gewesen"], text=None), False)
 
 class TestEntityOnOff(unittest.TestCase):
 
