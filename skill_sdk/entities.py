@@ -500,7 +500,7 @@ def to_integer(dt_time: datetime.date):
 
 def filter_date_list(datelist: List[datetime.date],
                      after: datetime.date = datetime.date.min,
-                     before: datetime.date = datetime.date.max):
+                     before: datetime.date = datetime.date.max) -> List[datetime.date]:
     """ filter a list of dates to a list of dates to be limited within a range and order it at once
     """
     return sorted((d for d in datelist if after < d < before), key=to_integer)
