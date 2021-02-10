@@ -138,6 +138,63 @@ The value is passes as string array without modification and can be manually con
     datetime.date(2019, 12, 31)
     ```
     
+* entities.closest_next_date(datelist: List[datetime.date], date: datetime.date) -> datetime.date:
+
+    Filters from a list of datetime.date the nearest future date which is after a given date.
+    The list can be unsorted. If there is no date after the given date, the given date will be returned, even if it is not part of the list.
+    
+    ```python
+    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 29))
+    datetime.date(2106, 10, 30)
+
+    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 30))
+    datetime.date(2106, 12, 30)
+    
+    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 12, 31))
+    datetime.date(2106, 12, 31)
+
+    ```
+    
+* entities.closest_previous_date(datelist: List[datetime.date], date: datetime.date) -> datetime.date:
+
+    Filters from a list of datetime.date the nearest past date which is before a given date.
+    The list can be unsorted. If there is no date before the given date, the given date will be returned, even if it is not part of the list.
+    
+    ```python
+    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 29))
+    datetime.date(2106, 8, 30)
+
+    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 30))
+    datetime.date(2106, 8, 30)
+    
+    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 8, 29))
+    datetime.date(2106, 8, 29)
+
+    ```
+
+* entities.filter_date_list(datelist: List[datetime.date], after: datetime.date = datetime.date.min, before: datetime.date = datetime.date.max) -> List[datetime.date]:
+
+    Filters from a list of datetime.date the all dates wich are between after and before.
+    The list can be unsorted and the result will be sorted. If no date is given for after or/and before the filter will not limit that end of the list.
+    
+    ```python
+    >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], after: datetime.date(2106, 8, 30), before: datetime.date(2106, 12, 30))
+    [datetime.date(2106, 10, 30)]
+
+     >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], after: datetime.date(2106, 8, 31))
+    [datetime.date(2106, 10, 30), datetime.date(2106, 12, 30)]
+    
+    >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], before: datetime.date(2106, 12, 29))
+    [datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)]
+    
+    >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)])
+    [datetime.date(2106, 8, 30), datetime.date(2106, 10, 30), datetime.date(2106, 12, 30)]
+    
+     >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], after: datetime.date(2106, 8, 30), before: datetime.date(2106, 10, 29))
+    []
+
+    ```
+    
 * entities.to_time(value: Union[List, AnyStr, datetime.datetime]) -> datetime.time
 
     Gently parses ISO-formatted datetime string and returns the time value. 
@@ -166,6 +223,23 @@ The value is passes as string array without modification and can be manually con
 * entities.convert(value: str, to_type: Union[bool, datetime, int, float, Callable]) -> Any
     
     Generic converter: converts value to one of primitive types or any other type if conversion function supplied as `to_type` parameter.
+ 
+* entities.is_text_including_words(text: str, words: List[str]) -> bool
+
+    Method which checks if a text inlcudes any word of a given list. The word needs to be completly and lonly (my not be part of another word, but followed by punctation) in the text.
+    This method can be used to find signal words in a text e.g. for identifying the used tense - be carefull to use this function only for NLU shortcoming and not for replacing logic which could be solved by NLU. 
+
+    ```python
+    >>> entities.is_text_including_words('Welches Datum war vor 11 Tagen?', ['war', 'gewesen'])
+    true
+
+    >>> entities.is_text_including_words('Wann waren die Play-Offs?', ['war', 'gewesen'])
+    false
+    
+    >>> entities.is_text_including_words('Heute war?', ['war', 'gewesen'])
+    true
+
+    ```
 
 **Example**
 
@@ -173,13 +247,24 @@ The value is passes as string array without modification and can be manually con
 from typing import List
 from skill_sdk import Response, entities, skill
 
-@skill.intent_handler("WEATHER_CURRENT")
-def weather(date_list: List[str]) -> Response:
+@skill.intent_handler("WEATHER__CURRENT")
+def weather(context: Context, date_list: List[str], stt_result: [str]) -> Response:
     # Return the weather forecast for a number of days
     my_dates = [entities.to_datetime(date) for date in date_list]
-    # Or if we only need a single date:
+    
+    # Or if we only need a single date, we could take the first of the list:
     my_date = entities.to_datetime(date_list)
-    ...
+    
+    # Or if we want to decide on the used tense in the speach to text result:
+    _sst_result = entities.get_value(sst_result)
+    _past_tense_used = entities.is_text_including_words(_sst_result, ['war', 'gewesen'])
+    if _past_tense_used:
+        # if past tense has been used, we will take the closed past date to today (or today)
+        my_date = entities.closest_previous_date(my_dates, context.now())
+    else:
+        # if past tense has not been used, we will take the closed future date to today (or today)
+        my_date = entities.closest_next_date(my_dates, context.now())
+
 ```
 
 ## Simplifying entities handling with decorators 
@@ -193,6 +278,7 @@ The following types are supported:
 - `datetime.timedelta`
 - `datetime.datetime` / `datetime.date` / `datetime.time`
 - `int` / `float` / `bool`
+- `str`
 
 **Examples**
 
@@ -216,6 +302,21 @@ from skill_sdk import Context, Response, skill
 @skill.intent_handler('WEATHER__CURRENT')
 def intent_handler_expecting_dates_list(context: Context, date_list: [datetime.date]) -> Response:
     ...
+   ```
+   
+   ```python
+import datetime
+from skill_sdk import Context, Response, skill
+
+@skill.intent_handler('WEATHER__CURRENT')
+def weather(context: Context, date_list: List[str], date_list: [datetime.date], stt_result: str) -> Response:
+    # streamlined example of choosing a date on the used tense, by having done the converting via decorators:
+    if entities.is_text_including_words(sst_result, ['war', 'gewesen']):
+        # if past tense has been used, we will take the closed past date to today (or today)
+        my_date = entities.closest_previous_date(date_list, context.now())
+    else:
+        # if past tense has not been used, we will take the closed future date to today (or today)
+        my_date = entities.closest_next_date(date_list, context.now())
    ```
 
 By default, `intent_handler` decorator suppresses conversion errors and returns an instance of 
