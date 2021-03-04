@@ -141,7 +141,7 @@ class TestZipkin(unittest.TestCase):
         tracer = tracing.global_tracer()
         with self.assertRaises(tracing.UnsupportedFormatException):
             tracer.extract(tracing.Format.BINARY, {})
-        ctx = tracing.SpanContext(None, None)
+        ctx = tracing.SpanContext(None, None, None)
         with self.assertRaises(tracing.UnsupportedFormatException):
             tracer.inject(ctx, tracing.Format.BINARY, {})
 
@@ -161,6 +161,7 @@ class TestB3Codec(unittest.TestCase):
         assert span_context.span_id == 'a2fb4a1d1a96d312'
         assert span_context.trace_id == '463ac35c9f6413ad48485a3953bb6124'
         assert span_context.parent_id == '0020000000000001'
+        assert span_context.testing is None
         assert span_context.flags == 0x02
 
         # validate that missing parentspanid does not cause an error
@@ -183,8 +184,15 @@ class TestB3Codec(unittest.TestCase):
         with self.assertRaises(tracing.InvalidCarrierException):
             codec.inject(None, [])
 
-        ctx = SpanContext(trace_id='463ac35c9f6413ad48485a3953bb6124', span_id='a2fb4a1d1a96d312', parent_id='0020000000000001', flags=2)
+        ctx = SpanContext(trace_id='463ac35c9f6413ad48485a3953bb6124',
+                          span_id='a2fb4a1d1a96d312',
+                          parent_id='0020000000000001',
+                          testing='1',
+                          flags=2)
         carrier = {}
         codec.inject(ctx, carrier)
-        self.assertEqual(carrier, {'X-B3-SpanId': 'a2fb4a1d1a96d312', 'X-B3-ParentSpanId': '0020000000000001',
-                                   'X-B3-TraceId': '463ac35c9f6413ad48485a3953bb6124', 'X-B3-Flags': '1'})
+        self.assertEqual(carrier, {'X-B3-SpanId': 'a2fb4a1d1a96d312',
+                                   'X-B3-ParentSpanId': '0020000000000001',
+                                   'X-B3-TraceId': '463ac35c9f6413ad48485a3953bb6124',
+                                   'X-Testing': '1',
+                                   'X-B3-Flags': '1'})

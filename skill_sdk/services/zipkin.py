@@ -80,7 +80,8 @@ def queued_transport(encoded_span):
 
 
 class B3Codec:
-    """ https://github.com/openzipkin/b3-propagation
+    """
+    https://github.com/openzipkin/b3-propagation
 
     """
     trace_header = 'X-B3-TraceId'
@@ -88,6 +89,9 @@ class B3Codec:
     parent_span_header = 'X-B3-ParentSpanId'
     sampled_header = 'X-B3-Sampled'
     flags_header = 'X-B3-Flags'
+
+    # Internal header
+    testing_header = 'X-Testing'
 
     def inject(self, span_context, carrier):
         """ Inject B3 headers
@@ -107,6 +111,9 @@ class B3Codec:
         elif int(span_context.flags) & SAMPLED_FLAG == SAMPLED_FLAG:
             carrier[self.sampled_header] = '1'
 
+        if span_context.testing is not None:
+            carrier[self.testing_header] = span_context.testing
+
     def extract(self, carrier):
         """ Extract B3 headers from a carrier
 
@@ -119,6 +126,7 @@ class B3Codec:
         trace_id = carrier.get(lowercase_keys.get(self.trace_header.lower()))
         span_id = carrier.get(lowercase_keys.get(self.span_header.lower()))
         parent_id = carrier.get(lowercase_keys.get(self.parent_span_header.lower()))
+        testing = carrier.get(lowercase_keys.get(self.testing_header.lower()))
         flags = 0x00
         sampled = carrier.get(lowercase_keys.get(self.sampled_header.lower()))
         if sampled == '1':
@@ -127,21 +135,22 @@ class B3Codec:
         if debug == '1':
             flags |= DEBUG_FLAG
         return SpanContext(trace_id=trace_id, span_id=span_id,
-                           parent_id=parent_id, flags=flags,
-                           baggage=None)
+                           parent_id=parent_id, testing=testing,
+                           flags=flags, baggage=None)
 
 
 class SpanContext(tracing.SpanContext):
     """ Current tracing context """
 
-    __slots__ = ['trace_id', 'span_id', 'parent_id', 'flags', '_baggage']
+    __slots__ = ['trace_id', 'span_id', 'parent_id', 'testing', 'flags', '_baggage']
 
-    def __init__(self, trace_id, span_id, parent_id, flags, baggage=None):
+    def __init__(self, trace_id, span_id, parent_id, flags, baggage=None, testing=None):
         self.trace_id = trace_id
         self.span_id = span_id
         self.parent_id = parent_id or None
         self.flags = flags
         self._baggage = baggage or tracing.SpanContext.EMPTY_BAGGAGE
+        self.testing = testing
 
 
 class Span(tracing.Span):

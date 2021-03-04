@@ -16,7 +16,7 @@ from unittest.mock import patch
 from skill_sdk import tracing
 from skill_sdk import log
 
-test_context = tracing.SpanContext('abcd', '1234')
+test_context = tracing.SpanContext('abcd', '1234', '1')
 
 
 class TestSmartHubGELFFormatter(unittest.TestCase):
