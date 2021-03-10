@@ -33,11 +33,11 @@ class TestTracing(unittest.TestCase):
             set_global_tracer(None)
 
         with start_span('test_span') as span:
-            self.assertEqual(span.tracer.service_name, 'unnamed-skill')
+            self.assertIsNotNone(span.tracer)
             self.assertEqual(span.operation_name, 'test_span')
             with start_span('another_one', child_of=span) as child_span:
-                self.assertEqual(child_span.span_name, 'another_one')
-                self.assertEqual(child_span.context, span.context)
+                self.assertEqual(child_span.operation_name, 'another_one')
+                self.assertEqual(child_span.context.trace_id, span.context.trace_id)
 
     @patch('skill_sdk.tracing.Tracer.start_span')
     def test_start_span_decorator(self, start_mock):
@@ -68,7 +68,7 @@ class TestNoopCodec(unittest.TestCase):
         span_context = codec.extract(carrier)
         assert span_context.span_id == 'a2fb4a1d1a96d312'
         assert span_context.trace_id == '463ac35c9f6413ad48485a3953bb6124'
-        assert span_context.testing == '1'
+        assert span_context.baggage == {'testing': True}
 
     def test_b3_inject(self):
         codec = Codec()
@@ -76,7 +76,9 @@ class TestNoopCodec(unittest.TestCase):
         with self.assertRaises(InvalidCarrierException):
             codec.inject(None, [])
 
-        ctx = SpanContext(trace_id='463ac35c9f6413ad48485a3953bb6124', span_id='a2fb4a1d1a96d312', testing='1')
+        ctx = SpanContext(trace_id='463ac35c9f6413ad48485a3953bb6124',
+                          span_id='a2fb4a1d1a96d312',
+                          baggage=dict(testing='1'))
         carrier = {}
         codec.inject(ctx, carrier)
         self.assertEqual({'X-B3-SpanId': 'a2fb4a1d1a96d312',
@@ -85,7 +87,7 @@ class TestNoopCodec(unittest.TestCase):
     def test_extract_inject_exceptions(self):
         tracer = global_tracer()
         with self.assertRaises(UnsupportedFormatException):
-            tracer.extract(Format.BINARY, {})
+            tracer.extract('Unknown', {})
         ctx = SpanContext(None, None, None)
         with self.assertRaises(UnsupportedFormatException):
-            tracer.inject(ctx, Format.BINARY, {})
+            tracer.inject(ctx, 'Unknown', {})

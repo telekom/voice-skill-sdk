@@ -40,7 +40,7 @@ class SmartHubGELFFormatter(logging.Formatter):
         """ Formats a record """
 
         tracer: tracing.Tracer = tracing.global_tracer()
-        span: tracing.Span = tracer.active_span
+        context = tracer.active_span.context
 
         line = {
             # Timestamp in milliseconds
@@ -56,9 +56,11 @@ class SmartHubGELFFormatter(logging.Formatter):
             # Log message
             "message": record.getMessage(),
             # Trace id
-            "traceId": getattr(span, 'trace_id') if span else None,
+            "traceId": getattr(context, 'trace_id', None),
             # Span id
-            "spanId": getattr(span, 'span_id') if span else None,
+            "spanId": getattr(context, 'span_id', None),
+            # Testing flag
+            "testing": getattr(context, 'baggage', {}).get('testing'),
             # Tenant: a skill is not aware of tenant, so we report a service name instead
             "tenant": getattr(tracer, 'service_name', tracing.get_service_name())
         }
