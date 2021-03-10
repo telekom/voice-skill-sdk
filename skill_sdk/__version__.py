@@ -22,7 +22,7 @@
 __name__ = 'skill-sdk'
 __description__ = 'Magenta Voice Skill SDK for Python'
 __url__ = 'https://github.com/telekom/voice-skill-sdk/'
-__version__ = '0.12.0'
+__version__ = '0.12.1.dev1'
 __author__ = 'Deutsche Telekom Voicification Suite'
 __author_email__ = 'vineet.hingorani@telekom.de'
 __license__ = 'MIT'

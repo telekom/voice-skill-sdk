@@ -47,8 +47,8 @@ class Codec:
         """
         if not isinstance(carrier, dict):
             raise InvalidCarrierException("carrier not a dictionary")
-        carrier[self.trace_header] = span_context.trace_id
-        carrier[self.span_header] = span_context.span_id
+        carrier[self.trace_header] = str(span_context.trace_id)
+        carrier[self.span_header] = str(span_context.span_id)
         carrier[self.testing_header] = span_context.baggage.get("testing")
 
     def extract(self, carrier):
@@ -91,7 +91,7 @@ class start_span:
 
     def __init__(self, operation_name, tracer: Tracer = None, *args, **kwargs):
         if "child_of" in kwargs:
-            tracer = kwargs["child_of"].tracer
+            tracer = getattr(kwargs["child_of"], 'tracer', global_tracer())
 
         self.span = None
         self.tracer = tracer

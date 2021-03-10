@@ -40,7 +40,7 @@ class SmartHubGELFFormatter(logging.Formatter):
         """ Formats a record """
 
         tracer: tracing.Tracer = tracing.global_tracer()
-        context = tracer.active_span.context
+        context = tracer.active_span and tracer.active_span.context
 
         line = {
             # Timestamp in milliseconds

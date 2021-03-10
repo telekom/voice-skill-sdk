@@ -18,7 +18,7 @@ from json import loads, JSONDecodeError
 from types import SimpleNamespace
 from unittest.mock import patch, mock_open, MagicMock
 from bottle import HTTPResponse
-from opentracing.scope import Scope
+from opentracing.scope_managers import _ThreadLocalScope
 import requests_mock
 
 import skill_sdk
@@ -261,14 +261,17 @@ class TestInvoke(unittest.TestCase):
         self.assertIn('*****', log.getvalue())
         self.assertEqual(self.request.json['context']['tokens'], {"demotoken": "abcdefg"})
 
-    @patch.object(Scope, 'close')
+    @patch.object(_ThreadLocalScope, 'close')
     def test_invoke_close_tracing_scope(self, close_scope):
         """ Ensure tracing scope is closed when invoke is complete """
+        from skill_sdk.tracing import initialize_tracer
+
+        initialize_tracer()
 
         with patch('skill_sdk.routes.request', new=self.request), \
                 patch.object(skill_sdk.skill.Skill, '_intents', new={'TELEKOM_Demo_Intent': self.intent}):
             from skill_sdk.routes import invoke
-            result = invoke()
+            invoke()
 
         close_scope.assert_called_once()
 

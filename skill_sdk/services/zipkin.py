@@ -67,6 +67,7 @@ def get_service_name():
 
 SAMPLED_FLAG = 0x01
 DEBUG_FLAG = 0x02
+TESTING_FLAG = 0x04
 
 
 def queued_transport(encoded_span):
@@ -104,15 +105,17 @@ class B3Codec:
             raise tracing.InvalidCarrierException('carrier not a dictionary')
         carrier[self.trace_header] = span_context.trace_id
         carrier[self.span_header] = span_context.span_id
-        if span_context.parent_id is not None:
-            carrier[self.parent_span_header] = span_context.parent_id
-        if int(span_context.flags) & DEBUG_FLAG == DEBUG_FLAG:
+        parent_id = span_context.parent_id
+        if parent_id is not None:
+            carrier[self.parent_span_header] = parent_id
+        flags = span_context.flags
+        if int(flags) & DEBUG_FLAG == DEBUG_FLAG:
             carrier[self.flags_header] = '1'
-        elif int(span_context.flags) & SAMPLED_FLAG == SAMPLED_FLAG:
+        elif int(flags) & SAMPLED_FLAG == SAMPLED_FLAG:
             carrier[self.sampled_header] = '1'
 
-        if span_context.testing is not None:
-            carrier[self.testing_header] = span_context.testing
+        if int(flags) & TESTING_FLAG == TESTING_FLAG:
+            carrier[self.testing_header] = '1'
 
     def extract(self, carrier):
         """ Extract B3 headers from a carrier
@@ -134,33 +137,38 @@ class B3Codec:
         debug = carrier.get(lowercase_keys.get(self.flags_header.lower()))
         if debug == '1':
             flags |= DEBUG_FLAG
-        return SpanContext(trace_id=trace_id, span_id=span_id,
-                           parent_id=parent_id, testing=testing,
-                           flags=flags, baggage=None)
+        if testing == '1':
+            flags |= TESTING_FLAG
+        return SpanContext(
+            trace_id=trace_id,
+            span_id=span_id,
+            parent_id=parent_id,
+            flags=flags,
+            baggage=dict(testing=testing) if testing else tracing.SpanContext.EMPTY_BAGGAGE
+        )
 
 
 class SpanContext(tracing.SpanContext):
     """ Current tracing context """
 
-    __slots__ = ['trace_id', 'span_id', 'parent_id', 'testing', 'flags', '_baggage']
+    __slots__ = ['trace_id', 'span_id', 'parent_id', 'flags', '_baggage']
 
-    def __init__(self, trace_id, span_id, parent_id, flags, baggage=None, testing=None):
+    def __init__(self, trace_id, span_id, parent_id, flags, baggage=None):
         self.trace_id = trace_id
         self.span_id = span_id
         self.parent_id = parent_id or None
         self.flags = flags
         self._baggage = baggage or tracing.SpanContext.EMPTY_BAGGAGE
-        self.testing = testing
 
 
 class Span(tracing.Span):
     """ Tracing span """
 
-    def __init__(self, tracer, context, operation_name, span: zipkin.zipkin_span):
+    def __init__(self, tracer, operation_name, context, span: zipkin.zipkin_span):
         """ Wrap Zipkin span
         """
-        super(Span, self).__init__(tracer, context, operation_name)
         self._span = span
+        super(Span, self).__init__(tracer, operation_name, context)
 
     def set_operation_name(self, operation_name):
         """ Set the operation name.
@@ -168,7 +176,7 @@ class Span(tracing.Span):
         :param operation_name: the new operation name
         :return: Returns the Span for chaining
         """
-        super().set_operation_name(operation_name)
+        self.operation_name = operation_name
         self._span.override_span_name(operation_name)
         return self
 
@@ -193,14 +201,6 @@ class Span(tracing.Span):
         self._span.update_binary_annotations({key: value})
         return self
 
-    @property
-    def flags(self):
-        return self.context.flags
-
-    def is_sampled(self):
-        """ If this span is sampled """
-        return self.context.flags & SAMPLED_FLAG == SAMPLED_FLAG
-
     def __enter__(self):
         """ Enable as context manager
 
@@ -219,10 +219,6 @@ class Span(tracing.Span):
         """
         self._span.stop(exc_type, exc_val, exc_tb)
 
-    def start(self):
-        self._span.start()
-        return self
-
     def finish(self, finish_time=None):
         self._span.stop()
 
@@ -232,7 +228,8 @@ class ZipkinTracer(tracing.Tracer):
     """
 
     def __init__(self, service_name, port, sample_rate, transport_handler=None, scope_manager=None):
-        super().__init__(service_name, scope_manager=scope_manager or ThreadLocalScopeManager())
+        super().__init__(scope_manager=scope_manager or ThreadLocalScopeManager())
+        self.service_name = service_name
         self._port = port
         self._sample_rate = sample_rate
         self._transport_handler = transport_handler or queued_transport
@@ -257,7 +254,7 @@ class ZipkinTracer(tracing.Tracer):
             start_time,
             ignore_active_span,
         )
-        return self.scope_manager.activate(span.start(), finish_on_close)
+        return self.scope_manager.activate(span, finish_on_close)
 
     def start_span(self,
                    operation_name=None,
@@ -267,9 +264,10 @@ class ZipkinTracer(tracing.Tracer):
                    start_time=None,
                    ignore_active_span=False):
 
-        logger.debug("Starting Zipkin span [%s] for service [%s]", operation_name, self.service_name)
+        parent = self.active_span if self.active_span and not ignore_active_span else child_of
 
-        parent: Span = self.active_span if self.active_span and not ignore_active_span else child_of
+        if isinstance(parent, Span):
+            parent = parent.context
 
         if parent is None:
             zipkin_attrs = zipkin.create_attrs_for_span(self._sample_rate)
@@ -297,7 +295,7 @@ class ZipkinTracer(tracing.Tracer):
         )
 
         context = SpanContext(*zipkin_attrs)
-        return Span(self, context, operation_name, zipkin_span)
+        return Span(self, operation_name, context, zipkin_span)
 
     def extract(self, format, carrier):
         """ Extract B3 headers
