@@ -7,13 +7,19 @@
 # For details see the file LICENSE in the top directory.
 #
 #
+import json
 import logging
+import logging.config
 import threading
 import unittest
+from logging import makeLogRecord
 from configparser import ConfigParser
 from unittest.mock import patch, Mock
 
-from skill_sdk import tracing
+import bottle
+import wsgiref.util
+
+from skill_sdk import tracing, log, routes
 from skill_sdk.services import zipkin
 from skill_sdk.services.zipkin import QUEUE
 from skill_sdk.requests import CircuitBreakerSession
@@ -155,6 +161,20 @@ class TestZipkin(unittest.TestCase):
         with self.assertRaises(tracing.UnsupportedFormatException):
             tracer.inject(ctx, tracing.Format.BINARY, {})
 
+    def test_tracer_with_gelf_log(self):
+        record = makeLogRecord({
+            'levelno': logging.INFO,
+            'levelname': 'INFO',
+            'thread': '123456',
+            'name': 'demo.logger',
+            'msg': 'testmessage',
+            'audience': 'development',
+        })
+        with tracing.start_active_span("span", self.request):
+            r = json.loads(log.SmartHubGELFFormatter().format(record))
+            self.assertEqual('430ee1c3e2deccfa', r['traceId'])
+            self.assertTrue(bool(r['testing']))
+
 
 class TestB3Codec(unittest.TestCase):
     def test_b3_extract(self):
@@ -189,7 +209,7 @@ class TestB3Codec(unittest.TestCase):
 
         carrier.update({'X-Testing': '1'})
         span_context = codec.extract(carrier)
-        assert span_context.baggage == {'testing': '1'}
+        assert span_context.baggage == {'testing': True}
         assert span_context.flags == 0x05
 
     def test_b3_inject(self):

@@ -158,7 +158,11 @@ class SpanContext(tracing.SpanContext):
         self.span_id = span_id
         self.parent_id = parent_id or None
         self.flags = flags
-        self._baggage = baggage or tracing.SpanContext.EMPTY_BAGGAGE
+        _baggage = baggage or tracing.SpanContext.EMPTY_BAGGAGE
+        if int(flags) & TESTING_FLAG == TESTING_FLAG:
+            _baggage = {**_baggage, **dict(testing=True)}
+
+        self._baggage = _baggage
 
 
 class Span(tracing.Span):
@@ -294,7 +298,12 @@ class ZipkinTracer(tracing.Tracer):
             }, **(tags or {}))
         )
 
-        context = SpanContext(*zipkin_attrs)
+        context = SpanContext(
+            trace_id=zipkin_attrs.trace_id,
+            span_id=zipkin_attrs.span_id,
+            parent_id=zipkin_attrs.parent_span_id,
+            flags=zipkin_attrs.flags
+        )
         return Span(self, operation_name, context, zipkin_span)
 
     def extract(self, format, carrier):
