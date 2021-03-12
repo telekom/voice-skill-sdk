@@ -91,8 +91,9 @@ class B3Codec:
     sampled_header = 'X-B3-Sampled'
     flags_header = 'X-B3-Flags'
 
-    # Internal header
+    # Internal headers
     testing_header = 'X-Testing'
+    simple_testing = 'Testing'
 
     def inject(self, span_context, carrier):
         """ Inject B3 headers
@@ -116,6 +117,7 @@ class B3Codec:
 
         if int(flags) & TESTING_FLAG == TESTING_FLAG:
             carrier[self.testing_header] = '1'
+            carrier[self.simple_testing] = 'true'
 
     def extract(self, carrier):
         """ Extract B3 headers from a carrier

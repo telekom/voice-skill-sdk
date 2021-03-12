@@ -36,6 +36,7 @@ class Codec:
     trace_header = "X-B3-TraceId"
     span_header = "X-B3-SpanId"
     testing_header = "X-Testing"
+    simple_testing = 'Testing'
 
     def inject(self, span_context, carrier):
         """
@@ -49,7 +50,10 @@ class Codec:
             raise InvalidCarrierException("carrier not a dictionary")
         carrier[self.trace_header] = str(span_context.trace_id)
         carrier[self.span_header] = str(span_context.span_id)
-        carrier[self.testing_header] = span_context.baggage.get("testing")
+
+        if span_context.baggage.get("testing"):
+            carrier[self.testing_header] = "1"
+            carrier[self.simple_testing] = 'true'
 
     def extract(self, carrier):
         """

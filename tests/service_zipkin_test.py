@@ -151,7 +151,9 @@ class TestZipkin(unittest.TestCase):
                                                       'X-B3-SpanId': '0123456789abcdef',
                                                       'X-B3-ParentSpanId': '0123456789abcdef',
                                                       'X-B3-Sampled': '1',
-                                                      'X-Testing': '1'})
+                                                      'X-Testing': '1',
+                                                      'Testing': 'true',
+                                                      })
 
     def test_extract_inject_exceptions(self):
         tracer = tracing.global_tracer()
@@ -231,4 +233,5 @@ class TestB3Codec(unittest.TestCase):
                                    'X-B3-TraceId': '463ac35c9f6413ad48485a3953bb6124',
                                    'X-B3-Flags': '1',
                                    'X-Testing': '1',
+                                   'Testing': 'true',
                                    })

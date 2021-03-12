@@ -82,7 +82,7 @@ class TestNoopCodec(unittest.TestCase):
         carrier = {}
         codec.inject(ctx, carrier)
         self.assertEqual({'X-B3-SpanId': 'a2fb4a1d1a96d312',
-                          'X-B3-TraceId': '463ac35c9f6413ad48485a3953bb6124', 'X-Testing': '1'}, carrier)
+                          'X-B3-TraceId': '463ac35c9f6413ad48485a3953bb6124', 'X-Testing': '1', 'Testing': 'true'}, carrier)
 
     def test_extract_inject_exceptions(self):
         tracer = global_tracer()
