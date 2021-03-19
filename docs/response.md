@@ -16,7 +16,8 @@ In other words: Everything that is not an unrecoverable error.
 - **type_**: Response type. Valid response types are `skill_sdk.responses.RESPONSE_TYPE_ASK`, `skill_sdk.responses.RESPONSE_TYPE_TELL` and `skill_sdk.responses.RESPONSE_TYPE_ASK_FREETEXT`.
 - **text**: Text message that client reads out to the user. It can be a question if response is of `RESPONSE_TYPE_ASK`/`RESPONSE_TYPE_ASK_FREETEXT` types, or a statement if it is `RESPONSE_TYPE_TELL`. If the text is wrapped in a `<speak>` tag, it is interpreted as SSML.
 - **card**: Response card. The card is sent to a user's companion app on the mobile device.
-- **result**: Additional storage used for debug info and client [kits](use_kits_and_actions.md) activation. 
+- **result**: Additional storage used for debug info, client [kits](use_kits_and_actions.md) activation 
+  and delayed client [tasks](client_tasks.md) execution.  
 
 ### Cards
 

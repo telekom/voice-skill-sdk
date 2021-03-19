@@ -157,14 +157,15 @@ class ExecutionTime(NamedTuple):
 
 
 class InvokeData(NamedTuple):
+    """Intent invoke data: name, skill and parameters"""
 
-    # Intent
+    # Intent name
     intent: str
 
     # Skill Id
     skill_id: Optional[str] = None
 
-    # Parameters (will be translated to intent invoke attributes)
+    # Parameters (will be converted to intent invoke attributes)
     parameters: Dict[str, Any] = {}
 
 
@@ -184,7 +185,14 @@ class DelayedClientTask(NamedTuple):
     @staticmethod
     def invoke(intent: str, skill_id: str = None, **kwargs) -> "DelayedClientTask":
         """
-        Create a task to invoke intent after speech end
+        Create a task to invoke intent
+
+            Execute "WEATHER__INTENT" in 10 seconds after speech end:
+            >>>         response = Response("Weather forecast in 10 seconds.").with_task(
+            >>>             ClientTask.invoke("WEATHER__INTENT")
+            >>>                 .after(offset=datetime.timedelta(seconds=10))
+            >>>         )
+
 
         @param intent:      Intent name to invoke
         @param skill_id:    Optional skill Id

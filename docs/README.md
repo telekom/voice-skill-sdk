@@ -23,6 +23,7 @@ This folder contains the voice skill SDK for Python documentation.
 - [HTTP timeout exception](http_timeout_exception.md)
 - [Kubernetes Integrations](k8s.md)
 - [Use_Kits & Actions](use_kits_and_actions.md)
+- [Execute Client Tasks](client_tasks.md)
 - [Deploy the Skill](running.md)
 - [Serverless Deployment](serverless.md)
 
