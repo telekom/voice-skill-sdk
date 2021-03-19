@@ -8,11 +8,12 @@
 #
 #
 import unittest
+import importlib
 import datetime
 from datetime import timedelta
 from dateutil.tz import tzutc, tzoffset
+import isodate
 
-import importlib
 from skill_sdk import l10n
 
 # Reset Location entity, in case it's been overwritten by services.location
@@ -465,3 +466,7 @@ class TestConverter(unittest.TestCase):
         self.assertEqual(entities.to_time(['--12-31T12:30']), datetime.time(12, 30))
 
         self.assertEqual(entities.to_time([]), datetime.time.min)
+
+    def test_time_delta_to_duration(self):
+        delta = datetime.timedelta(hours=1, minutes=5, seconds=6)
+        self.assertEqual('PT1H5M6S', isodate.duration_isoformat(delta))

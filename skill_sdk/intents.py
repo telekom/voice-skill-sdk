@@ -28,7 +28,7 @@ from .sessions import Session
 logger = logging.getLogger(__name__)
 
 
-class InvalidTokenError(BaseException):
+class InvalidTokenError(Exception):
     """
     Error type raised in case an invalid token has been received.
     """
@@ -78,6 +78,7 @@ class Context:
         self.request = request
         request_data = request.json
         request_context = request_data.get('context')
+        self.skill_id = request_context.get('skillId')
         self.intent_name = request_context.get('intent')
         self.spi_version = request_context.get('spiVersion')
         self.client_type_name = request_context.get('clientTypeName')
