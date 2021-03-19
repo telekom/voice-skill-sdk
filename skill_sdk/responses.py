@@ -630,7 +630,7 @@ class Result:
             result["targetDeviceId"] = self.target_device_id
 
         if self.delayed_client_task:
-            result["delayedClientTask"] = _serialize(self.delayed_client_task)
+            result["delayedClientTask"] = _serialize(self.delayed_client_task, use_camel_case=True)
 
         return result
 

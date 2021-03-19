@@ -408,9 +408,9 @@ class TestResponse(unittest.TestCase):
                     "data": {},
                     "local": True,
                     "delayedClientTask": {
-                        "invoke_data": {"intent": "WEATHER__INTENT", "parameters": {}},
-                        "execution_time": {
-                            "execute_after": {
+                        "invokeData": {"intent": "WEATHER__INTENT", "parameters": {}},
+                        "executionTime": {
+                            "executeAfter": {
                                 "reference": "SPEECH_END",
                                 "offset": "P0D",
                             }
