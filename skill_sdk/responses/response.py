@@ -90,7 +90,9 @@ class SkillInvokeResponse(CamelModel):
         :param data:
         """
         if "type" in data and type_ is not None:
-            raise ValueError(f"Ambiguous response type: 'type_'={type_} and 'type='{data['type']}.")
+            raise ValueError(
+                f"Ambiguous response type: 'type_'={type_} and 'type='{data['type']}."
+            )
 
         params: Dict[str, Any] = dict(text=text)
         if type_ is not None:
