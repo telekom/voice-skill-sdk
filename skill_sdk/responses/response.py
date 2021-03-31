@@ -15,7 +15,6 @@
 import copy
 from enum import Enum
 from typing import Any, Dict, Optional, List, Text, Union
-from pydantic import ValidationError
 
 from skill_sdk.i18n import Message
 from skill_sdk.util import CamelModel
@@ -91,10 +90,7 @@ class SkillInvokeResponse(CamelModel):
         :param data:
         """
         if "type" in data and type_ is not None:
-            raise ValidationError(
-                f"Ambiguous response type: 'type_'={type_} and 'type='{data['type']}.",
-                type(self),
-            )
+            raise ValueError(f"Ambiguous response type: 'type_'={type_} and 'type='{data['type']}.")
 
         params: Dict[str, Any] = dict(text=text)
         if type_ is not None:
@@ -190,10 +186,7 @@ class SkillInvokeResponse(CamelModel):
         """
 
         if self.type == ResponseType.TELL:
-            raise ValidationError(
-                f"Response type: {self.type} ends the session.",
-                type(self),
-            )
+            raise ValueError(f"Response type: {self.type} ends the session.")
 
         session = SessionResponse(attributes=attributes)
         return self.copy(update=dict(session=session))
