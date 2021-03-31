@@ -8,11 +8,13 @@
 #
 #
 
+import asyncio
 import unittest
+
 import pytest
 from fastapi.testclient import TestClient
 from skill_sdk import init_app
-from skill_sdk.util import camel_to_snake, snake_to_camel, Server
+from skill_sdk.util import camel_to_snake, snake_to_camel, Server, run_until_complete
 
 
 class TestUtils(unittest.TestCase):
@@ -39,6 +41,9 @@ class TestUtils(unittest.TestCase):
         """
         self.assertEqual("camelCase", snake_to_camel("camelCase"))
 
+    def test_run_async_from_sync(self):
+        assert run_until_complete(async_sleep())
+
 
 def test_server_run_in_thread():
     app = init_app()
@@ -51,3 +56,20 @@ def test_server_run_in_thread():
             "description": "Magenta Voice Skill SDK for Python",
             "version": "1",
         }
+
+
+async def async_sleep():
+    await asyncio.sleep(0.1)
+    return True
+
+
+def test_run_async_from_sync():
+    assert asyncio.iscoroutine(async_sleep())
+    assert run_until_complete(async_sleep())
+
+
+@pytest.mark.asyncio
+async def test_run_sync_from_async():
+    assert await async_sleep()
+    # This would raise "RuntimeError: This event loop is already running"
+    assert run_until_complete(async_sleep())

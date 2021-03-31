@@ -129,7 +129,7 @@ class TestResponse(unittest.TestCase):
             },
             response.dict(),
         )
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValueError):
             tell("Hola").with_session(
                 attr1="attr-1",
                 attr2="attr-2",

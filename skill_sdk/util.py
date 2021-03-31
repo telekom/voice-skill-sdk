@@ -23,6 +23,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Mapping, Text, TypeVar,
 
 import orjson
 import pydantic
+import nest_asyncio
 from pydantic import validator, ValidationError  # noqa
 from pydantic.utils import lenient_issubclass
 import uvicorn
@@ -124,6 +125,9 @@ def run_until_complete(func: Awaitable[T]) -> T:
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+
+    if loop.is_running():
+        nest_asyncio.apply(loop)
 
     return loop.run_until_complete(func)
 
