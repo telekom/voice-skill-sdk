@@ -34,7 +34,7 @@ DEFAULT_HTTP_CACHE = CacheControlLocalLRUCache(1000)
 
 
 class BadHttpResponseCodeException(RequestException):
-    """ Raised if http return status code is not in expected range """
+    """Raised if http return status code is not in expected range"""
 
     def __init__(self, status_code, *args, **kwargs):
         self.status_code = status_code
@@ -49,7 +49,7 @@ class BadHttpResponseCodeException(RequestException):
 
 
 class CircuitBreakerSession(Session):
-    """ Requests session with a circuit breaker """
+    """Requests session with a circuit breaker"""
 
     DEFAULT_TIMEOUT = config.get('requests', 'timeout', fallback=DEFAULT_REQUEST_TIMEOUT)
 
@@ -58,8 +58,9 @@ class CircuitBreakerSession(Session):
                  good_codes=(),
                  bad_codes=range(400, 600),
                  cache=None,
-                 timeout=None):
-        Session.__init__(self)
+                 timeout=None,
+                 response_hook=None):
+        super().__init__()
         self.internal = internal
         self.circuit_breaker = circuit_breaker or DEFAULT_CIRCUIT_BREAKER
         self.good_codes = good_codes
@@ -69,10 +70,13 @@ class CircuitBreakerSession(Session):
         self.mount('http://', CacheControlAdapter(cache=cache))
         self.mount('https://', CacheControlAdapter(cache=cache))
         self.timeout = timeout or self.DEFAULT_TIMEOUT
+        if response_hook:
+            self.hooks.update(dict(response=response_hook))
 
     def _check_status_code(self, response):
         def _code_in(code: int, item: Union[int, range, Tuple]) -> bool:
-            """ Check if code is in allowed range
+            """
+            Check if code is in allowed range
 
             @param code:
             @param item:
@@ -102,9 +106,10 @@ class CircuitBreakerSession(Session):
                 kwargs.update(proxies={'http': 'http://localhost:8888'})
 
         @self.circuit_breaker
-        def _inner_call(*args, **kwargs):
-            """ Wraps Session.request """
-            response = Session.request(*args, **kwargs)
+        def _inner_call(*a, **kw):
+            """Wraps Session.request"""
+
+            response = Session.request(*a, **kw)
             logger.debug('Request headers: %s', response.request.headers)
             logger.debug('Response headers: %s', response.headers)
             self._check_status_code(response)

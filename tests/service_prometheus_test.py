@@ -7,13 +7,15 @@
 # For details see the file LICENSE in the top directory.
 #
 #
+
 import os
 import time
 import unittest
 from unittest.mock import patch
 from types import SimpleNamespace
 
-from gevent.greenlet import Greenlet
+import requests
+import requests_mock
 
 from skill_sdk.services import prometheus
 
@@ -74,20 +76,37 @@ class TestPrometheus(unittest.TestCase):
         self.assertIn(b'le="0.05",operation="Latency Test",version="0.1"} 1.0', metrics)
 
     def test_prometheus_partner(self):
-        import requests
-        from requests_mock import Mocker
-
-        with Mocker() as m:
+        with requests_mock.Mocker() as m:
             m.get('http://fohf_partner_call.com', text='resp', status_code=404)
             m.get('http://working_partner_call.com', text='', status_code=200)
 
             with prometheus.partner_call(requests.get, 'partner-call') as get:
-                [get('http://fohf_partner_call.com') for x in range(0, 15)]
-                [get('http://working_partner_call.com') for x in range(0, 10)]
+                [get('http://fohf_partner_call.com') for _ in range(0, 15)]
+                [get('http://working_partner_call.com') for _ in range(0, 10)]
 
         result = prometheus.metrics()
         self.assertIn(b'partner_name="partner-call",status="404"} 15.0', result)
         self.assertIn(b'partner_name="partner-call",status="200"} 10.0', result)
+
+    def test_prometheus_partner_with_circuit_breaker(self):
+        from skill_sdk.requests import CircuitBreakerSession, BadHttpResponseCodeException
+        from skill_sdk.services.prometheus import count_partner_calls, http_partner_request_count_total
+
+        http_partner_request_count_total.clear()
+
+        with requests_mock.Mocker() as m:
+            m.get("http://httpbin.org/status/404", text='', status_code=404)
+            m.get("http://httpbin.org/status/500", text='', status_code=500)
+
+            with CircuitBreakerSession(response_hook=count_partner_calls('partner-call')) as session:
+                with self.assertRaises(BadHttpResponseCodeException):
+                    [session.get("http://httpbin.org/status/404") for _ in range(1, 15)]
+                with self.assertRaises(BadHttpResponseCodeException):
+                    [session.get("http://httpbin.org/status/500") for _ in range(1, 15)]
+
+        result = prometheus.metrics()
+        self.assertIn(b'partner_name="partner-call",status="404"} 1.0', result)
+        self.assertIn(b'partner_name="partner-call",status="500"} 1.0', result)
 
     @patch.object(prometheus.config, 'getint', return_value=2)
     @patch.object(prometheus.multiprocess, 'MultiProcessCollector')

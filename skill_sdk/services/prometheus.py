@@ -43,7 +43,7 @@ http_partner_request_count_total = Counter('http_partner_request_count', 'HTTP R
 
 
 def update_stats():
-    """ Update current mertics """
+    """Update current metrics"""
     intent_gauge.set(len(app().get_intents()))
     thread_count.set(active_count())
     open_circuit_breakers.set(sum(1 for _ in CircuitBreakerMonitor.get_open()))
@@ -51,10 +51,11 @@ def update_stats():
 
 @contextmanager
 def partner_call(callback, partner_name: str):
-    """ Context manager to count HTTP requests to partner services
-            ...
-            with partner_call(session.get, 'partner-service-name') as get:
-                response = get(URL)
+    """
+    Context manager to count HTTP requests to partner services
+
+        >>> with partner_call(requests.get, 'partner-service-name') as get:
+        >>>     response = get(URL)
 
     """
     def wrapper(*args, **kwargs):   # NOSONAR
@@ -66,8 +67,24 @@ def partner_call(callback, partner_name: str):
     yield wrapper
 
 
+def count_partner_calls(partner_name: str):
+    """
+    Hook that can be attached to `requests.session` to count HTTP requests to partner services:
+
+        >>> with CircuitBreakerSession(response_hook=count_partner_calls('partner-service-name')) as session:
+        >>>     session.get(URL)
+
+    @param partner_name:
+    @return:
+    """
+    return lambda r, **kwargs: http_partner_request_count_total.labels(
+        job=config.get('skill', 'name'),
+        partner_name=partner_name,
+        status=r.status_code).inc()
+
+
 def prometheus(callback):
-    """ In-progress requests counter """
+    """In-progress requests counter"""
 
     @in_progress_requests.track_inprogress()
     def wrapper(*args, **kwargs):   # NOSONAR
@@ -85,13 +102,13 @@ def prometheus(callback):
 
 
 class PrometheusLatency:
-    """ Prometheus latency  wrapper. Can be used as decorator:
-            ...
+    """
+    Prometheus latency  wrapper. Can be used as decorator:
 
-        # As decorator:
-        @prometheus_latency('operation_name')
-        def decorated():
-            ...
+        >>> # As decorator:
+        >>> @prometheus_latency('operation_name')
+        >>> def decorated():
+        >>>     ...
 
     """
 
@@ -115,7 +132,8 @@ prometheus_latency = PrometheusLatency
 
 @get('/prometheus')
 def metrics():
-    """ Prometheus metrics endpoint.
+    """
+    Prometheus metrics endpoint.
     ---
     get:
         description: Get Prometheus metrics
@@ -133,7 +151,7 @@ def metrics():
 
 
 def setup_service():
-    """ Setup prometheus client """
+    """Setup prometheus client"""
 
     # Initialize multiprocessing mode
     workers = config.getint('http', 'workers', fallback=1)
