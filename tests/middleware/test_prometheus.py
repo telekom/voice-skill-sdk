@@ -17,16 +17,17 @@ from httpx import Response
 
 from skill_sdk.middleware.prometheus import (
     Prometheus,
+    count_partner_calls,
     handle_metrics,
     partner_call,
     prometheus_latency,
 )
 
+from skill_sdk.requests import Client
+
 
 class TestPrometheus(unittest.TestCase):
     def test_prometheus_middleware(self):
-        from skill_sdk.routes import api_base
-
         Prometheus.requests_latency()
         Prometheus.partner_requests_count()
         r = SimpleNamespace()
@@ -58,6 +59,8 @@ class TestPrometheus(unittest.TestCase):
     @respx.mock
     def test_prometheus_partner(self):
 
+        Prometheus.partner_requests_count().clear()
+
         respx.get("http://fohf_partner_call.com").mock(
             return_value=Response(404, text="resp")
         )
@@ -72,3 +75,24 @@ class TestPrometheus(unittest.TestCase):
         metrics = handle_metrics(SimpleNamespace()).body
         self.assertIn(b'partner_name="partner-call",status="404"} 15.0', metrics)
         self.assertIn(b'partner_name="partner-call",status="200"} 10.0', metrics)
+
+    @respx.mock
+    def test_partner_call_with_circuit_breaker(self):
+        Prometheus.partner_requests_count().clear()
+
+        respx.get("http://httpbin.org/status/404").mock(
+            return_value=Response(404, text="")
+        )
+        respx.get("http://httpbin.org/status/500").mock(
+            return_value=Response(500, text="")
+        )
+
+        with Client(response_hook=count_partner_calls("partner-call")) as client:
+            with self.assertRaises(httpx.HTTPError):
+                [client.get("http://httpbin.org/status/404") for _ in range(1, 15)]
+            with self.assertRaises(httpx.HTTPError):
+                [client.get("http://httpbin.org/status/500") for _ in range(1, 15)]
+
+        metrics = handle_metrics(SimpleNamespace()).body
+        self.assertIn(b'partner_name="partner-call",status="404"} 1.0', metrics)
+        self.assertIn(b'partner_name="partner-call",status="500"} 1.0', metrics)

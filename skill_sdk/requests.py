@@ -10,7 +10,7 @@
 """HTTP sync/async clients with circuit breaker"""
 
 from datetime import timedelta
-from typing import Iterable, List, Union
+from typing import Callable, Iterable, List, Union
 import logging
 from warnings import warn
 
@@ -47,6 +47,7 @@ class Client(httpx.Client):
         circuit_breaker: CircuitBreaker = None,
         timeout: Union[int, float] = None,
         exclude: Iterable[codes] = None,
+        response_hook: Callable[[httpx.Response], None] = None,
         **kwargs,
     ) -> None:
         """
@@ -58,12 +59,15 @@ class Client(httpx.Client):
         :param circuit_breaker: optional circuit breaker, DEFAULT_CIRCUIT_BREAKER if not set
         :param timeout:         optional timeout for a request
         :param exclude:         list of HTTP status codes that are treated as "normal" (no exception is raised)
+        :param response_hook:   function to be executed after a response is received (with response as argument)
         :param kwargs:          keyword arguments passed over to request
         """
         self.internal = internal
         self.circuit_breaker = circuit_breaker or DEFAULT_CIRCUIT_BREAKER
         self.exclude = tuple(exclude) if exclude else ()
         super().__init__(timeout=timeout or DEFAULT_REQUESTS_TIMEOUT, **kwargs)
+        if response_hook:
+            self.event_hooks = dict(response=[response_hook])
 
     def request(
         self,
@@ -120,6 +124,7 @@ class AsyncClient(httpx.AsyncClient):
         circuit_breaker: CircuitBreaker = None,
         timeout: Union[int, float] = None,
         exclude: List[codes] = None,
+        response_hook: Callable[[httpx.Response], None] = None,
         **kwargs,
     ) -> None:
         """
@@ -130,13 +135,16 @@ class AsyncClient(httpx.AsyncClient):
 
         :param circuit_breaker: optional circuit breaker, DEFAULT_CIRCUIT_BREAKER if not set
         :param timeout:         optional timeout for a request
-        :param exclude:         list of HTTP status codes that are treated as "normal"
+        :param exclude:         list of HTTP status codes that are treated as "normal" (no exception is raised)
+        :param response_hook:   function to be executed after a response is received (with response as argument)
         :param kwargs:          keyword arguments passed over to request
         """
         self.internal = internal
         self.circuit_breaker = circuit_breaker or DEFAULT_CIRCUIT_BREAKER
         self.exclude = tuple(exclude) if exclude else ()
         super().__init__(timeout=timeout or DEFAULT_REQUESTS_TIMEOUT, **kwargs)
+        if response_hook:
+            self.event_hooks = dict(response=[response_hook])
 
     async def request(
         self,

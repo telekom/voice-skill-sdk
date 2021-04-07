@@ -12,10 +12,11 @@
 
 import time
 import logging
-from functools import wraps
+from functools import partial, wraps
 from typing import Any, Callable, Text
 from contextlib import contextmanager, ContextDecorator
 from fastapi import FastAPI
+import httpx
 
 from skill_sdk.config import settings
 
@@ -69,14 +70,14 @@ class prometheus_latency(ContextDecorator):  # noqa
     """
     Prometheus latency wrapper. Can be used as context manager and decorator:
 
-        # As context manager:
-        with prometheus_latency("operation_name"):
-            ...
+        >>> # As context manager:
+        >>> with prometheus_latency("operation_name"):
+        >>>     ...
 
-        # As decorator:
-        @prometheus_latency("operation_name")
-        def decorated():
-            ...
+        >>> # As decorator:
+        >>> @prometheus_latency("operation_name")
+        >>> def decorated():
+        >>>     ...
 
     """
 
@@ -93,14 +94,22 @@ class prometheus_latency(ContextDecorator):  # noqa
         Prometheus.requests_latency().labels(*labels).observe(end - self.begin)
 
 
+def _inc_partner_call(partner_name: Text, response: httpx.Response) -> None:
+    try:
+        status_code = response.status_code
+        labels = [settings.SKILL_NAME, partner_name, status_code]
+        Prometheus.partner_requests_count().labels(*labels).inc()
+    except AttributeError as ex:
+        logger.error("Cannot log a partner call: %s", repr(ex))
+
+
 @contextmanager
 def partner_call(partner_name: Text, func: Callable[..., Any]):
     """
-    Context manager to count HTTP requests to partner services
+    Context manager to count HTTP requests to partner service
 
-        ...
-        with partner_call('partner-service-name', client.get) as get:
-            response = get(URL)
+        >>> with partner_call('partner-service', client.get) as get:
+        >>>     response = get(URL)
 
     """
 
@@ -114,17 +123,29 @@ def partner_call(partner_name: Text, func: Callable[..., Any]):
         :return:
         """
         response = func(*args, **kwargs)
-
-        try:
-            status_code = response.status_code
-            labels = [settings.SKILL_NAME, partner_name, status_code]
-            Prometheus.partner_requests_count().labels(*labels).inc()
-        except AttributeError as ex:
-            logger.error("Cannot log a partner call: %s", repr(ex))
+        _inc_partner_call(partner_name, response)
 
         return response
 
     yield wrapper
+
+
+def count_partner_calls(partner_name: Text) -> Callable[[httpx.Response], None]:
+    """
+    Response hook to count HTTP requests to partner service,
+    can be attached to `skill_sdk.requests.Client`/`AsyncClient`
+
+        >>> from skill_sdk.requests import AsyncClient
+        >>> from skill_sdk.middleware.prometheus import count_partner_calls
+        >>>
+        >>> async with AsyncClient(
+        >>>     response_hook=count_partner_calls('partner-service')
+        >>> ) as client:
+        >>>     response = await client.get(URL)
+
+    """
+
+    return partial(_inc_partner_call, partner_name)
 
 
 def setup(app: FastAPI) -> None:
