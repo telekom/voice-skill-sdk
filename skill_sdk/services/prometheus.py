@@ -77,10 +77,20 @@ def count_partner_calls(partner_name: str):
     @param partner_name:
     @return:
     """
-    return lambda r, **kwargs: http_partner_request_count_total.labels(
-        job=config.get('skill', 'name'),
-        partner_name=partner_name,
-        status=r.status_code).inc()
+    def hook(r, **kwargs):
+        """
+        This hook is executed after response is received
+
+        @param r:       HTTP response
+        @param kwargs:  keyword arguments used to construct the request (headers, cookies, timeout, etc.)
+        @return:        not supposed to return anything
+        """
+        http_partner_request_count_total.labels(
+            job=config.get('skill', 'name'),
+            partner_name=partner_name,
+            status=r.status_code).inc()
+
+    return hook
 
 
 def prometheus(callback):
