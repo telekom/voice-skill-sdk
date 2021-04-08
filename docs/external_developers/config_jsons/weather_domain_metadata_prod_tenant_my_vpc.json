@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "exportVersion": "1",
+  "model": "SVH_PRODUCTION__WEATHER",
+  "modelMinConfidence": null,
+  "answerModel": "SVH_PRODUCTION__WEATHER_REPROMPT",
+  "answerModelMinConfidence": null,
+  "type": "nuance",
+  "created": "2020-10-12T11:20:47.237Z",
+  "intents": [
+    {
+      "name": "WEATHER__STATUS",
+      "ttl": {
+        "interactions": 0,
+        "minutes": 0
+      },
+      "requiredEntities": [],
+      "entityFiller": "WEATHER_REPROMPT__REPROMPT",
+      "fallbackToNoSession": false,
+      "entities": [
+        {
+          "name": "location",
+          "type": "FREETEXT",
+          "fillPolicy": [
+            "context"
+          ],
+          "ttl": {
+            "interactions": 0,
+            "minutes": 0
+          },
+          "useFromSession": true,
+          "mappable": true
+        },
+        {
+          "name": "zipcode",
+          "type": "ZIP_CODE",
+          "fillPolicy": [
+            "device"
+          ],
+          "ttl": {
+            "interactions": 0,
+            "minutes": 0
+          },
+          "useFromSession": true,
+          "mappable": false
+        },
+        {
+          "name": "timezone",
+          "type": "TIMEZONE",
+          "fillPolicy": [
+            "device"
+          ],
+          "ttl": {
+            "interactions": 0,
+            "minutes": 0
+          },
+          "useFromSession": true,
+          "mappable": false
+        },
+        {
+          "name": "date",
+          "type": "FREETEXT",
+          "fillPolicy": [
+            "context"
+          ],
+          "ttl": {
+            "interactions": 0,
+            "minutes": 0
+          },
+          "useFromSession": true,
+          "mappable": false
+        },
+        {
+          "name": "time_range",
+          "type": "FREETEXT",
+          "fillPolicy": [
+            "context"
+          ],
+          "ttl": {
+            "interactions": 0,
+            "minutes": 0
+          },
+          "useFromSession": true,
+          "mappable": false
+        },
+        {
+          "name": "timeRange",
+          "type": "FREETEXT",
+          "fillPolicy": [
+            "context"
+          ],
+          "ttl": {
+            "interactions": 0,
+            "minutes": 0
+          },
+          "useFromSession": true,
+          "mappable": false
+        }
+      ],
+      "prompts": [
+        {
+          "entities": [
+            "location"
+          ],
+          "messages": [
+            "Für welche Stadt?"
+          ]
+        },
+        {
+          "entities": [
+            "zipcode"
+          ],
+          "messages": [
+            "Für welche Stadt?"
+          ]
+        }
+      ],
+      "requiredTokens": [],
+      "errors": []
+    }
+  ]
+}

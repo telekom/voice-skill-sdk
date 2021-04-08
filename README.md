@@ -63,7 +63,7 @@ from skill_sdk import skill, Response
 
 @skill.intent_handler("HELLO_WORLD__INTENT")
 async def handler() -> Response:
-    return "Hello World!"
+    return Response("Hello World!")
 
 app = skill.init_app()
 

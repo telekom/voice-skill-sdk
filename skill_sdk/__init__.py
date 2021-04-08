@@ -37,3 +37,5 @@ from skill_sdk.responses import (
     ask_freetext,
     tell,
 )
+
+from skill_sdk.intents import Request

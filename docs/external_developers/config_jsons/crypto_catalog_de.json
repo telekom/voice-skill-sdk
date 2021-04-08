@@ -1,0 +1,36 @@
+{
+  "v2": {
+    "showsInCatalog": true,
+    "displayName": "Bitcoin Preis von Kraken",
+    "headline": "Informationen",
+    "description": "Letzter gehandelter Bitcoin Preis",
+    "iconUrl": "https://support.lamassu.is/hc/article_attachments/360048690612/kraken-logo.png",
+    "design": {
+      "backgroundColor": "#10658e",
+      "backgroundImageUrl": "https://www.kraken.com/_assets/files/2019-02//kraken_desktop_hero/2880.webp"
+    },
+    "examplePhrases": [
+      "Was ist der Bitcoin Preis?",
+      "Bitcoin"
+    ],
+    "walkthrough": {
+      "title": "Bitcoin Preis von Kraken",
+      "subtitle": "Frag doch direkt mal:",
+      "order": 0,
+      "examplePhrases": [
+        1
+      ]
+    },
+    "adCard": {
+      "imageUrl": "https://www.kraken.com/_assets/files/2019-02//kraken_desktop_hero/2880.webp",
+      "url": "https://www.kraken.com/"
+    },
+    "menuActions": {
+      "impressum": {
+        "url": "https://www.kraken.com/",
+        "type": "WEB"
+      }
+    }
+  },
+  "fileVersion": 5
+}
