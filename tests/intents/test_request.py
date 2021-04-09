@@ -10,7 +10,6 @@
 
 import os
 import time
-import asyncio
 import logging
 import datetime
 import threading
@@ -19,6 +18,7 @@ from unittest.mock import patch
 from dateutil import tz
 import pytest
 
+from pydantic import ValidationError
 from skill_sdk.intents import RequestContextVar, request
 from skill_sdk.util import (
     create_context,
@@ -30,10 +30,19 @@ from skill_sdk.i18n import Translations
 
 logger = logging.getLogger(__name__)
 
+TEST_INTENT = "Test__Intent"
+
+
+def test_session():
+    r = create_request(TEST_INTENT, session={'key-1': 'value-1', 'key-2': 'value-2'})
+    assert r.session.attributes == {'key-1': 'value-1', 'key-2': 'value-2'}
+    with pytest.raises(ValidationError):
+        create_request(TEST_INTENT, session={'non-string': datetime.datetime(year=2100, month=1, day=1)})
+
 
 class TestContext(unittest.TestCase):
     def setUp(self):
-        self.ctx = create_context("Testing__Intent")
+        self.ctx = create_context(TEST_INTENT)
 
     def test_tz_functions(self):
         now = datetime.datetime(
@@ -41,7 +50,7 @@ class TestContext(unittest.TestCase):
         )
 
         self.assertEqual("CET", self.ctx.gettz().tzname(now))
-        ctx = create_context("Testing__Intent", timezone="Mars")
+        ctx = create_context(TEST_INTENT, timezone="Mars")
         with patch.object(logging.Logger, "error") as log:
             self.assertEqual("UTC", ctx.gettz().tzname(now))
             self.assertEqual(log.call_count, 1)
@@ -50,7 +59,7 @@ class TestContext(unittest.TestCase):
             # Make sure timezone is set to "Europe/Berlin"
             self.assertEqual(self.ctx.attributes.get("timezone"), ["Europe/Berlin"])
             self.assertEqual(self.ctx.gettz().tzname(now), "CET")
-            ctx = create_context("Testing__Intent", timezone="Europe/Athens")
+            ctx = create_context(TEST_INTENT, timezone="Europe/Athens")
             self.assertIsInstance(ctx.gettz(), datetime.tzinfo)
 
             with patch.dict(os.environ, {"TZ": "UTC"}):
@@ -81,7 +90,7 @@ class TestContextLocal(unittest.TestCase):
     )
 
     def setUp(self):
-        req = create_request("TELEKOM_Demo_Intent", timezone=["Europe/Berlin"])
+        req = create_request(TEST_INTENT, timezone=["Europe/Berlin"])
 
         @mock_datetime_now(self.now, datetime)
         def run():
@@ -99,7 +108,7 @@ class TestContextLocal(unittest.TestCase):
 
     @mock_datetime_now(now, datetime)
     def test_context_local_now(self):
-        req = create_request("TELEKOM_Demo_Intent", timezone=["Europe/Athens"])
+        req = create_request(TEST_INTENT, timezone=["Europe/Athens"])
         next_day = datetime.datetime(year=2100, month=12, day=20, hour=0, minute=0)
         with RequestContextVar(request=req):
             self.assertEqual(request.context.today().timestamp(), next_day.timestamp())

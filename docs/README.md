@@ -23,8 +23,9 @@ This folder contains the voice skill SDK for Python documentation.
 
 ### Request/Response
 
-TODO:
 - [Invoke Request](request.md)
+
+TODO:
 - [Entities](entities.md)
 - [Response](response.md)
 - [Circuit Breakers and Tracing](tracing.md)

@@ -1,49 +1,80 @@
 # Skill Invoke Request
 
-Magenta Voice skill is invoked by Common Voice Interface (CVI) 
+Magenta Voice skill is invoked by Common Voice Interface (CVI), providing invoke data in [InvokeSkillRequestDto](https://htmlpreview.github.io/?https://raw.githubusercontent.com/telekom/voice-skill-sdk/blob/master/docs/skill-spi.html#_invokeskillrequestdto)
 
-Skill invocation request consists of two data transfer object (DTO): a request context and request session.
-The context carries data about an intent being invoked (intent name, attributes, tokens, etc), 
-while the session carries data that persists between user interactions.   
+Skill invocation request consists of `spi_version` (string value specifying protocol version) and two object: 
+request session ([SessionRequestDto](https://htmlpreview.github.io/?https://raw.githubusercontent.com/telekom/voice-skill-sdk/blob/master/docs/skill-spi.html#_sessionrequestdto))
+and the context ([SkillContextDto](https://htmlpreview.github.io/?https://raw.githubusercontent.com/telekom/voice-skill-sdk/blob/master/docs/skill-spi.html#_skillcontextdto))
 
-Before calling an intent handler function, SDK injects the `context` object into the global address space.
-Global `context` object is importable from `skill_sdk.intents` module (this is a thread-safe instance referring 
-to currently running request's context):
+The session carries data that persists between user interactions while 
+the context carries data about an intent being invoked (intent name, attributes, tokens, etc),   
+
+Global `request` object is available within an intent handler scope and can be imported from `skill_sdk.intents` module.
+If `request` attributes are accessed outside the intent handler, `None` is returned, 
+and the error "Accessing request local object outside of the request-response cycle." is logged.
 
 ```python 
->>> from skill_sdk.intents import context
->>> context
-<skill_sdk.intents.LocalContext object at 0x7faa1bc75910>
+>>> from skill_sdk.intents import request
+>>> request
+<skill_sdk.intents.request.RequestContextVar object at 0x7eff512b9c10>
+>>> request.spiVersion
+Accessing request local object outside of the request-response cycle.
 ```
 
-## Attributes of the context object
+## Session Attributes
 
-The `context` object has the following attributes:
+The `request.session` is dictionary-like key-value store where data can be stored and persists between user interactions.
+Keys and values must be strings, otherwise `ValidationError` is raised.
 
-- **intent_name**: The name of the intent that was called.
-- **attributesV2**: Raw version of the attributes received in the request.
+Before the response is sent back to CVI, session attributes are collected and attached to the response, 
+so the session data is persisting between invoke cycles.
+
+This is valid only for **ASK** responses (when skill prompts for something and expects an answer). 
+**TELL* response ends the session.    
+
+## Context Attributes
+
+`request.context` object has the following attributes:
+
+- **intent**: The name of the intent that was called.
+- **attributes_v2**: Raw version of the attributes received in the request.
 - **attributes**: Attributes as simple value lists (for backward compatibility).
-- **session**: A session object (see below).
-- **locale**: Dictionary with information of the clients location and language:
-  - **language**: Requested language in two-letter ISO 639-1 format (for example `de`).
-- **translation**: `gettext.Translation` instance bound to the current request `locale`.
+- **locale**: Requested language in two-letter ISO 639-1 format (for example `de`).
+- **skill_id**: Optional skill ID.
+- **client_type_name**: Optional client type (mini/premium/etc).
 - **tokens**: Access tokens to authenticate to other services (*see below*).
-- **configuration**: User configuration for the skill (*see below*).
+- **user_profile_config**: Optional user profile configuration for the skill (*see below*).
 
-## Timezone-aware datetime functions
+### Translation functions
 
-Skill invocation context object contains at least one required attribute: the device time zone name.
+During `request.context` object instantiation, as list of available translations is requested from the skill. 
+
+The translation that matches the request locale is injected into the `request` as `_trans` attribute, 
+and the translation functions are injected into `request.context` object:
+
+- `request.context._` is a synonym for `gettext` corresponding to requested locale. 
+
+
+- `request.context._n` is a synonym for `ngettext` corresponding to requested locale. 
+
+
+- `request.context._a` is a synonym for `getalltexts` correspondingly. 
+
+### Timezone-aware datetime functions
+
+If skill is configured to receive the device time zone, the invocation context contains at least the timezone name. 
+
 Device timezone is tenant-specific string value representing the device location around the globe 
 ([IANA Time Zone Database](https://www.iana.org/time-zones)) and can contain values like "Europe/Berlin" or "Europe/Paris".
 
 To get device-local date and time, the following shorthand methods are available:
 
-- `Context.now()`: returns device-local date and time with timezone information
-- `Context.today()`: returns the current device-local date (current day at midnight)
+- `request.context.now()` returns device-local date and time with timezone information.
 
-Both methods return `datetime.datetime` value with `datetime.tzinfo`
 
-The timezone must be provided by as an attribute to the intent, which can be automated in the intent configuration like this:
+- `request.context.today()` returns the current device-local date (current day at midnight).
+
+Both methods return `datetime.datetime` value with `datetime.tzinfo`.
 
 **Example**
 
@@ -69,27 +100,11 @@ CVI configuration for minimum MYINTENT intent getting timezone of the device as 
     }
 ```
 
- 
-## Detailed information about specific attributes
-
-### Attribute "session"
-
-The `session` attribute is a key value store where information can be stored inside a user interaction session.
-With few limitations, it acts like a dictionary:
-
-- Keys and values must be strings. If they are not, they are casted.
-- Keys must not be an empty string.
-- The sum of lengths of all keys and values must not exceed `MAX_SESSION_STORAGE_SIZE` which is 4096 at the time of writing.
-
-If the maximum session size is exceeded, a `SessionOversizeError` raises.
-
 ### Attribute "tokens"
 
-You can define the type of `tokens` in the `tokens.json` file. 
+Every intent invoke transmits existing tokens passing them as `request.context.tokens` dictionary to the intent handler.
 
-Every intent invoke transmits existing tokens passes them as `context.tokens` dictionary to the intent handler.
-
-The defined token name is the key of the dictionary. The token has strings as values.
+The defined token name is the dictionary key. The token a string value.
 
 **Example**
 
@@ -98,10 +113,10 @@ The defined token name is the key of the dictionary. The token has strings as va
         'external_service_token': 'TaglouvvattodcynipwenUcFatnirpilwikHomLawUvMojbienalAvNejNoupocs'
     }
     
-### Attribute "configuration"
+### Attribute "user_profile_config"
 
 Skill can define a number of configuration options that are exposed to end user via companion app.
-These options must be defined in skill manifest. Their values are made available in the `context.configuration` and passed with every skill invoke.
+These options must be defined in skill manifest. 
 
 A configuration option must be defined with the attributes below:
   - name
@@ -119,7 +134,7 @@ Configuration option sample of a skill, that can store user's favorite football 
 
 ```json
 {
-    "configuration": [
+    "user_profile_config": [
         {
             "name": "favourite-team",
             "label": {
@@ -177,11 +192,15 @@ CVI Core supplies configuration values to skill on invoke:
 {
   "context": {
     "intent": "...",
+    "attributes_v2": { ... },
     "attributes": { ... },
-    "configuration": {
+    "user_profile_config": {
       "favourite-team": ["1860"]
-    }
+    },
+    "locale":  "de",
+    "tokens": {}
   },
-  "session": { ... }
+  "session": { ... },
+  "spi_version": "1.2"
 }
 ```
