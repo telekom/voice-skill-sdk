@@ -41,14 +41,6 @@ To develop any skill from scratch you can use the SDK with the below command. Si
 
 Check the command line testing tool repository [here](https://github.com/telekom/voice-cli).
 
-## Server-less Deployment (AWS & Azure)
-
-* [Using lambda on Azure or AWS](../serverless.md)
-* AWS:
-    * Create an account on AWS free tier. Install the AWS-CLI on your local machine.
-    * Configure your AWS-CLI on your local machine using the following [documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration)
-    * Generate your key pair [here](https://console.aws.amazon.com/iam/home#/home)
-
 ## Configuring Skill on SDP
 
 To make your skill work with the speaker, you have to do the following steps. *Recommendation*: Try out the speaker before developing your own skill. ;-)

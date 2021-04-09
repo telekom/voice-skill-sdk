@@ -1,4 +1,6 @@
-# Context
+# Skill Invoke Request
+
+Magenta Voice skill is invoked by Common Voice Interface (CVI) 
 
 Skill invocation request consists of two data transfer object (DTO): a request context and request session.
 The context carries data about an intent being invoked (intent name, attributes, tokens, etc), 

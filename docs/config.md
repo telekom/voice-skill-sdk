@@ -11,6 +11,9 @@ not passed as keyword arguments by reading from the environment.
 
 ## Settings
 
+- **settings.API_BASE**: Base path of the skill API. If not set, defaults to `/v<skill version>/<skill name>`.
+  
+
 - **settings.SKILL_NAME**: Name of the skill. It is the second element of the endpoint URL. 
   Default: "skill-noname".
   

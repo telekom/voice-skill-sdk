@@ -19,11 +19,12 @@ This folder contains the voice skill SDK for Python documentation.
 - [An overview to Telekom Voicification Suite](tvs.md)
 - [Internationalization and Localization](i18n.md)
 - [Skill Catalog for Hallo Magenta App](catalog.md)
-- [Skill Configuration File](config.md)
+- [Skill Configuration Reference](config.md)
 
-### General Topics
+### Request/Response
 
-- [Context](context.md)
+TODO:
+- [Invoke Request](request.md)
 - [Entities](entities.md)
 - [Response](response.md)
 - [Circuit Breakers and Tracing](tracing.md)
@@ -33,9 +34,8 @@ This folder contains the voice skill SDK for Python documentation.
 
 ### Deployment
 
-- [Deploy the Skill](running.md)
+- [Deploy the Skill](deploy.md)
 - [Kubernetes Integrations](k8s.md)
-- [Serverless Deployment](serverless.md)
 
 
 ### How To
@@ -43,6 +43,5 @@ This folder contains the voice skill SDK for Python documentation.
 - [Simple Intent Examples](howtos/intent_example.md)
 - [How to use Persistence Service](howtos/persistence_service.md)
 - [Skill Manifest](howtos/skill_manifest.md)
-- [Run Services locally in Docker Compose](howtos/local_services.md)
 - [How to make HTTP Requests](howtos/make_http_requests.md)
 - [Test a skill](howtos/testing.md)
