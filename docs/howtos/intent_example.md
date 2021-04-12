@@ -2,34 +2,39 @@
 
 ## "Hello, World" 
 
-`impl/hello.py`
 ```python
-from skill_sdk import Context, Response, skill
+from skill_sdk import Response, skill
 
-@skill.intent_handler("SMALLTALK__GREETINGS")
-def handle(context: Context) -> Response:
+@skill.intent_handler("HELLO_WORLD__INTENT")
+def handle() -> Response:
     return Response("Hello, World!")
 ```
 
-## Weather example (this time with entities)
+## Current Weather
 
-Here is a sample weather intent (because everybody likes weather):
+"WEATHER__CURRENT" intent receives a location specified in the utterance ("What is the weather in Bonn?"), 
+and ZIP code from device configuration. 
 
-`impl/main_intent.py`
+Both values be `None`, like if user has not filled the ZIP code field in the device configuration 
+AND has uttered an intent without specifying the location
+("What's the weather like outside?")
+
 ```python
-from skill_sdk import Card, Response, tell, ask, skill
-from skill_sdk.entities import Location
+from skill_sdk import Response, tell, skill
+
 
 @skill.intent_handler("WEATHER__CURRENT")
-def weather(location: Location) -> Response:
-    if not location:
-        return ask("Please name a city")
+def weather(location: str = None, zip_code: str = None) -> Response:
     
-    msg = f"It is awesome in {location.text}. At least I hope the sun is shining"
-    card = Card(text=msg)
-    return tell(msg, card=card)
+    if not location and not zip_code:
+        return tell("Please fill ZIP code in device configuration, or specify desired location.")
+    
+    if not location:
+        # We have a ZIP code and tell weather for device location  
+        msg = "It is awesome around you. At least I hope the sun is shining!"
+        tell(msg).with_card(title_text="Current Weather", sub_text=zip_code, text=msg)
+
+    msg = f"It is awesome in {location}. At least I hope the sun is shining!"
+        
+    return tell(msg).with_card(title_text="Current Weather", sub_text=location, text=msg)
 ```
-
-## OAuth2 example
-
-TBD
