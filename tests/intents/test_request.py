@@ -34,10 +34,13 @@ TEST_INTENT = "Test__Intent"
 
 
 def test_session():
-    r = create_request(TEST_INTENT, session={'key-1': 'value-1', 'key-2': 'value-2'})
-    assert r.session.attributes == {'key-1': 'value-1', 'key-2': 'value-2'}
+    r = create_request(TEST_INTENT, session={"key-1": "value-1", "key-2": "value-2"})
+    assert r.session.attributes == {"key-1": "value-1", "key-2": "value-2"}
     with pytest.raises(ValidationError):
-        create_request(TEST_INTENT, session={'non-string': datetime.datetime(year=2100, month=1, day=1)})
+        create_request(
+            TEST_INTENT,
+            session={"non-string": datetime.datetime(year=2100, month=1, day=1)},
+        )
 
 
 class TestContext(unittest.TestCase):

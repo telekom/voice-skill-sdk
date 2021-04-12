@@ -25,6 +25,18 @@ from skill_sdk.util import CamelModel
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
+# Supported boolean state values
+BOOLEAN_VALUES = {
+    "1": True,
+    "yes": True,
+    "true": True,
+    "on": True,
+    "0": False,
+    "no": False,
+    "false": False,
+    "off": False,
+}
+
 
 def get_entity(entities: List[Any]) -> Optional[Any]:
     """Silently return first element of a list, or unchanged value otherwise"""
@@ -66,18 +78,15 @@ def __to_timedelta(value: datetime.timedelta):
 def on_off_to_boolean(value: str) -> bool:
     """
     Converts ON_OFF entity value to boolean
-    The value might be any string of ``0``, ``1``, ``on``, ``off``, ``true``, ``false``, case insensitive.
+    The value must be one of states defined in BOOLEAN_VALUES, case insensitive.
 
-    :param value: the entity value
+    @param value:
+    @return:
     """
-    logger.debug("converting value %s to bool", repr(value))
-    if not isinstance(value, str):
-        raise ValueError(f"The value {value.__repr__()} is not a string.")
-    if value.lower() in ("on", "true", "yes", "1"):
-        return True
-    if value.lower() in ("off", "false", "no", "0"):
-        return False
-    raise ValueError(f"{value} is not a proper on/off value.")
+    try:
+        return BOOLEAN_VALUES[value.lower()]
+    except (AttributeError, LookupError):
+        raise ValueError(f"Cannot cast {repr(value)} to boolean.") from None
 
 
 class TimeRange:
@@ -91,9 +100,12 @@ class TimeRange:
     end: Optional[datetime.datetime]
 
     def __init__(self, value: str):
-        self.begin, self.end = [
-            parser.parse(v) if v else None for v in value.split("/")
-        ]
+        try:
+            self.begin, self.end = [
+                parser.parse(v) if v else None for v in value.split("/")
+            ]
+        except (AttributeError, ValueError):
+            raise parser.ParserError(f"Unknown string format: {repr(value)}") from None
 
     def __contains__(
         self, value: Union[datetime.datetime, datetime.date, datetime.time]
@@ -137,7 +149,7 @@ class TimeRange:
             yield current
             current += datetime.timedelta(**{frame: 1})
 
-    def __str__(self):
+    def __repr__(self):
         return f'<TimeRange begin="{self.begin}" end="{self.end}">'
 
 
@@ -187,10 +199,12 @@ class TimeSet:
 
             return rrule.rrule(**{**rule, **dict(count=count, until=until_date)})
 
-        except (TypeError, ValueError) as ex:
-            raise ValueError(f'Could not parse timex value: "{self.timex}", {ex}')
+        except (AttributeError, TypeError, ValueError) as ex:
+            raise ValueError(
+                f'Could not parse timex value: "{self.timex}", {ex}'
+            ) from None
 
-    def __str__(self):
+    def __repr__(self):
         return f'<TimeSet timex="{self.timex}" tz="{self.tz}">'
 
 
@@ -270,40 +284,15 @@ class AttributeV2(CamelModel, Generic[T]):
         super().__init__(**__value)
 
 
-def rank(value: str) -> int:
-    """
-    Convert GENERIC_ORDER NLU concept to an index value.
-    The GENERIC_ORDER concept return a string that can be "max", "min", "succ", "prec", "0", "1", ...<br>
-        "max" -> -1<br>
-        "min" -> 0<br>
-        "1" -> 0<br>
-        "2" -> 1<br>
-        ...<br>
-    The "succ" value is not handled and should not be used in the intent samples.<br>
-    Please see https://developer.nuance.com/mix/documentation/nlu/#nuance_generic_order
-
-    :param value:   GENERIC_ORDER concept value.
-    :return: index
-    """
-    _ = {
-        "min": 0,
-        "max": -1,
-        "prec": -2,
-    }
-    try:
-        return _[value]
-    except KeyError:
-        return int(value) - 1
-
-
-def converter(to_type) -> Callable[[str], Any]:
+def converter(to_type):
     """
     Returns conversion function
 
     :param to_type: type or callable
     :return:
     """
-    _ = {
+
+    conversion_table = {
         datetime.timedelta: to_timedelta,
         datetime.datetime: to_datetime,
         datetime.date: to_date,
@@ -312,10 +301,10 @@ def converter(to_type) -> Callable[[str], Any]:
     }
 
     conversion_func = to_type if callable(to_type) else lambda a: a
-    return _.get(to_type, conversion_func)
+    return conversion_table.get(to_type, conversion_func)
 
 
-def convert(value: str, to_type=None):
+def convert(value: str, to_type: T = None) -> T:
     """
     Convert value to type defined in conversion table or using a conversion function provided in `to_type` param
     returns converted value or the value itself if conversion function not defined
