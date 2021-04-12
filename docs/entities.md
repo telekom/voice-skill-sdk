@@ -1,349 +1,31 @@
-# Entities
+# Intent Entities and Attributes
 
-An intent can have optional arguments called entities. Entities are passed to the skill in an invoke call and their type is defined in the intent definition.
+Natural language understanding tools use two basic concepts to translate human speech 
+into a form that can be processed by computers: 
 
-## Overview of the entities included in the SDK
+  - **intents**, that are classifying the user utterance.
 
-Due to their semantic (because almost every entity can have multiple values), entities are passed to the skill as **string arrays**, 
-and can be converted to a native Python representation using helper functions defined in `skill_sdk.entities` module.
 
-Here is overview of the entity types included in SDK:
+  - **entities**, that are units of structured data extracted from the utterance.
 
-### "Location" entities
 
-Location entities are converted to a `skill_sdk.entities.Location` instance.
+Additionally, Common Voice Interface (CVI) can enrich this information with **attributes**, 
+such as device data (location, name, time zone, etc.), raw text from ASR engine or entities from the conversational context.   
 
-- **Input**: City name (for example "Erste Strasse 1, Berlin)"
-  - Optionally, when the `Location` is instantiated directly,  `coordinates` are accepted as a tuple of float latitude and longitude
-- **Output**: `skill_sdk.entities.Location` instance
-  
-  **Example**
 
-    ```python
-    >>> loc = Location("Berlin")
+Due to their semantic (almost all entities may have multiple values), entity values are transmitted to the skill as **string lists**, 
+and can be converted to a native Python representation using various converters defined in `skill_sdk.intents.entities` module.
 
-    >>> loc.text
-    'Berlin'
-
-    >>> loc.coordinates
-    (52.4773614, 13.4265271)
-
-    >>> loc.timezone
-    'Europe/Berlin'
-    ```
-    - `Loc.text`: Free text value as transmitted in the request
-  - `Loc.coordinates`: Returns a tuple of latitude and longitude as float with the geographic location of the city
-  - `Loc.timezone`: Time zone name of the city as text
-
-
-### Timedelta entities
-
-Timedelta entities represent a time duration in ISO format. They can be converted to `datetime.timedelta` objects.
-
-- **Input**: Duration, format: "1H12M10S" for 1 hour, 12 minutes and 10 seconds
-- **Output**: `datetime.timedelta` instance
-
-**Example**
-
-```python
->>> isodate.parse_duration("PT10M")
-datetime.timedelta(0, 600)
-
->>> isodate.parse_duration("PT10H12M24S")
-datetime.timedelta(0, 36744)
-```
-
-### Boolean entities
-
-Entities `bool` convert values like "yes", "no", 0, 1, "true", "false", etc. to a boolean. 
-
-- **Input**: Yes, No, 1, 0, etc.
-- **Output**: bool, True or False
-
-
-### "Device" entities
-
-Entities of type `Device` represent a client device identified by a name. 
-
-- **Input**: device name
-- **Output**: `skill_sdk.entities.Device` instance
-
-### "Rank" entities
-
-Rank entities are representing a "generic order" concept ("Minimum", "Maximum", "Preceding", "Succeeding") and ordinal numbers ("First", "Second", "Third", etc.)
-They are converted to integer values corresponding to similar Python "slice" indices:
-
-| Order | Ordinal   | Value |
-|-------|-----------|------:|
-| "min" | "First"   |   0   |
-|       | "Second"  |   1   |
-|       | "Third"   |   2   |
-|       | **n**<sup>th</sup>| n-1|
-| "max" |           |   -1  |
-| "prec"|           |   -2  |
-
-
-### String entities
-
-String entities are being simply passedto the implementation function as a string without conversion. 
-
-- **Input**: String (for example "Hello, World")
-- **Output**: Same string (for example "Hello, World")
-
-The value is passes as string array without modification and can be manually converted to native Python objects using the following helpers: 
-
-### Helper functions
-
-* entities.get_value(entities: Union[List, Tuple]) -> str
-    
-    Silently returns first element from entities list. Will return unchanged value if passed parameter is not an instance of list or tuple.
-    
-* entities.to_datetime(value: Union[List, AnyStr, datetime.date, datetime.time]) -> datetime.datetime
-
-    Gently parses ISO-formatted datetime string and returns datetime value. 
-    If value is a list, will apply `entities.get_value` to get first element of the list.
-    
-    The parsing is relaxed so that: if year is omitted, the datetime object is extended with the current year,
-        if day is omitted - the current day is added to resulting datetime object.
-    
-    If value is a datetime.date, the datetime object is extended with "00:00" timestamp.
-    If value is a datetime.time, the datetime object is extended with current date.
-    
-    ```python
-    >>> entities.to_datetime('2106-12-31T12:30')
-    datetime.datetime(2106, 12, 31, 12, 30)
-
-    >>> entities.to_datetime(['--12-31'])
-    datetime.datetime(2019, 12, 31, 0, 0)
-
-    >>> entities.to_datetime(['17:30'])
-    datetime.datetime(2019, 3, 5, 17, 30)
-    ```
-    
-* entities.to_date(value: Union[List, AnyStr, datetime.datetime]) -> datetime.date
-
-    Gently parses ISO-formatted datetime string and returns the date value. 
-    If value is a list, will apply `entities.get_value` to get first element of the list.
-
-    The parsing is relaxed so that: if year is omitted, the date object is extended with the current year,
-        if day is omitted - the current day is added to resulting date object.
-    
-    If value is a datetime.datetime, the time part is trimmed.
-    
-    ```python
-    >>> entities.to_date('2106-12-31T12:30')
-    datetime.date(2106, 12, 31)
-
-    >>> entities.to_date(['--12-31'])
-    datetime.date(2019, 12, 31)
-    ```
-    
-* entities.closest_next_date(datelist: List[datetime.date], date: datetime.date) -> datetime.date:
-
-    Filters from a list of datetime.date the nearest future date which is after a given date.
-    The list can be unsorted. If there is no date after the given date, the given date will be returned, even if it is not part of the list.
-    
-    ```python
-    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 29))
-    datetime.date(2106, 10, 30)
-
-    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 30))
-    datetime.date(2106, 12, 30)
-    
-    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 12, 31))
-    datetime.date(2106, 12, 31)
-
-    ```
-    
-* entities.closest_previous_date(datelist: List[datetime.date], date: datetime.date) -> datetime.date:
-
-    Filters from a list of datetime.date the nearest past date which is before a given date.
-    The list can be unsorted. If there is no date before the given date, the given date will be returned, even if it is not part of the list.
-    
-    ```python
-    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 29))
-    datetime.date(2106, 8, 30)
-
-    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 10, 30))
-    datetime.date(2106, 8, 30)
-    
-    >>> entities.closest_next_date([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], datetime.date(2106, 8, 29))
-    datetime.date(2106, 8, 29)
-
-    ```
-
-* entities.filter_date_list(datelist: List[datetime.date], after: datetime.date = datetime.date.min, before: datetime.date = datetime.date.max) -> List[datetime.date]:
-
-    Filters from a list of datetime.date the all dates wich are between after and before.
-    The list can be unsorted and the result will be sorted. If no date is given for after or/and before the filter will not limit that end of the list.
-    
-    ```python
-    >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], after: datetime.date(2106, 8, 30), before: datetime.date(2106, 12, 30))
-    [datetime.date(2106, 10, 30)]
-
-     >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], after: datetime.date(2106, 8, 31))
-    [datetime.date(2106, 10, 30), datetime.date(2106, 12, 30)]
-    
-    >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], before: datetime.date(2106, 12, 29))
-    [datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)]
-    
-    >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)])
-    [datetime.date(2106, 8, 30), datetime.date(2106, 10, 30), datetime.date(2106, 12, 30)]
-    
-     >>> entities.filter_date_list([datetime.date(2106, 12, 30), datetime.date(2106, 8, 30), datetime.date(2106, 10, 30)], after: datetime.date(2106, 8, 30), before: datetime.date(2106, 10, 29))
-    []
-
-    ```
-    
-* entities.to_time(value: Union[List, AnyStr, datetime.datetime]) -> datetime.time
-
-    Gently parses ISO-formatted datetime string and returns the time value. 
-    If value is a list, will apply `entities.get_value` to get first element of the list.
-
-    If value is a datetime.datetime, the date part is trimmed. 
-    If value is a dateime.date (no time part), simple "00:00" timestamp is returned.
-    
-    ```python
-    >>> entities.to_time('2106-12-31T12:30')
-    datetime.time(12, 30)
-
-    >>> entities.to_time(['--12-31'])
-    datetime.time(0, 0)
-
-    ```
-    
-* entities.on_off_to_boolean(value: str) -> bool
-
-    Converts ON_OFF entity value to boolean.
-    
-* entities.rank(value: str) -> int
-
-    Converts RANK entity value to integer.
-    
-* entities.convert(value: str, to_type: Union[bool, datetime, int, float, Callable]) -> Any
-    
-    Generic converter: converts value to one of primitive types or any other type if conversion function supplied as `to_type` parameter.
- 
-* entities.is_text_including_words(text: str, words: List[str]) -> bool
-
-    Method which checks if a text inlcudes any word of a given list. The word needs to be completly and lonly (my not be part of another word, but followed by punctation) in the text.
-    This method can be used to find signal words in a text e.g. for identifying the used tense - be carefull to use this function only for NLU shortcoming and not for replacing logic which could be solved by NLU. 
-
-    ```python
-    >>> entities.is_text_including_words('Welches Datum war vor 11 Tagen?', ['war', 'gewesen'])
-    true
-
-    >>> entities.is_text_including_words('Wann waren die Play-Offs?', ['war', 'gewesen'])
-    false
-    
-    >>> entities.is_text_including_words('Heute war?', ['war', 'gewesen'])
-    true
-
-    ```
-
-**Example**
-
-```python
-from typing import List
-from skill_sdk import Response, entities, skill
-
-@skill.intent_handler("WEATHER__CURRENT")
-def weather(context: Context, date_list: List[str], stt_result: [str]) -> Response:
-    # Return the weather forecast for a number of days
-    my_dates = [entities.to_datetime(date) for date in date_list]
-    
-    # Or if we only need a single date, we could take the first of the list:
-    my_date = entities.to_datetime(date_list)
-    
-    # Or if we want to decide on the used tense in the speach to text result:
-    _sst_result = entities.get_value(sst_result)
-    _past_tense_used = entities.is_text_including_words(_sst_result, ['war', 'gewesen'])
-    if _past_tense_used:
-        # if past tense has been used, we will take the closed past date to today (or today)
-        my_date = entities.closest_previous_date(my_dates, context.now())
-    else:
-        # if past tense has not been used, we will take the closed future date to today (or today)
-        my_date = entities.closest_next_date(my_dates, context.now())
-
-```
-
-## Simplifying entities handling with decorators 
-
-To simplify the entities parsing and conversion, you can use the following decorator
-
-### Intent handler decorator: "@skill.intent_handler"
-
-The decorator `@intent_handler` uses type hints from the handler definition and converts the entities list into the specified type.
-The following types are supported:
-- `datetime.timedelta`
-- `datetime.datetime` / `datetime.date` / `datetime.time`
-- `int` / `float` / `bool`
-- `str`
-
-**Examples**
-
-To receive an entity converted to a single `datetime.timedelta` value:
-
-   ```python
-import datetime
-from skill_sdk import Context, Response, skill
-
-@skill.intent_handler('WEATHER__CURRENT')
-def intent_handler_expecting_timedelta(context: Context, timedelta: datetime.timedelta) -> Response:
-    ...
-   ```
-
-To receive a list of `datetime.date` values:
-
-   ```python
-import datetime
-from skill_sdk import Context, Response, skill
-
-@skill.intent_handler('WEATHER__CURRENT')
-def intent_handler_expecting_dates_list(context: Context, date_list: [datetime.date]) -> Response:
-    ...
-   ```
-   
-   ```python
-import datetime
-from skill_sdk import Context, Response, skill
-
-@skill.intent_handler('WEATHER__CURRENT')
-def weather(context: Context, date_list: List[str], date_list: [datetime.date], stt_result: str) -> Response:
-    # streamlined example of choosing a date on the used tense, by having done the converting via decorators:
-    if entities.is_text_including_words(sst_result, ['war', 'gewesen']):
-        # if past tense has been used, we will take the closed past date to today (or today)
-        my_date = entities.closest_previous_date(date_list, context.now())
-    else:
-        # if past tense has not been used, we will take the closed future date to today (or today)
-        my_date = entities.closest_next_date(date_list, context.now())
-   ```
-
-By default, `intent_handler` decorator suppresses conversion errors and returns an instance of 
-`EntityValueException` exception, if conversion error occurs. 
-
-You may add your own error handler to the `intent_handler` decorator to handle exceptions yourself:
-
-```python
-def date_error(name, value, exception) -> responses.Response:
-    return f"Wrong {name} value: {value}, exception {exception.__cause__}"
-
-@skill.intent_handler('Test_Intent', error_handler=date_error)
-def handler(date: datetime.date = None) -> responses.Response:
-  ...
-```
-
-## Nested and overlapping entities
 
 Some entities might have the values that are nesting in or overlapping each other.
 For example, the utterance "Turn on Super RTL" has two overlapping values for a `channel` entity: "RTL" and "Super RTL" 
-(both are valid channel names)
+(both are valid channel names).
 
-To distinguish their nesting, skill may request entity values in `AttributeV2` format.
-`AttributeV2` is a data structure that contains, along with the entity value, 
+To distinguish overlapping and nesting entities, skill receives entity values in `AttributeV2` format.
+`AttributeV2` is a data structure that contains, along with the entity values, 
 the unique index and pointers to other entities, that might contain or overlap this entity.
 
-Here is an example of two entity values for "Turn on Super RTL" utterance in `AttributeV2` format:
+An example of two entity values for "Turn on Super RTL" utterance in `AttributeV2` format:
  
 ```json   
     "attributesV2": {
@@ -366,36 +48,335 @@ Here is an example of two entity values for "Turn on Super RTL" utterance in `At
     }
 ```   
 
+## Entity Types
+
+Here is overview of the entity types included in SDK:
+
+
+### Type: `datetime`
+
+Date/time entities extract date and time values from the utterance. 
+They are transmitted in ISO-8601 string format with time zone 
+and can be converted to `datetime.date`/`datetime.time` or `datetime.datetime` objects.
+
+#### Parsers
+
+- `to_date`: converts an ISO-8601 formatted string to `datetime.date` value. If value is a `datetime.datetime`, 
+  the time part is trimmed.
+
+
+- `to_time`: converts an ISO-8601 formatted string to `datetime.time` value. If value is a `datetime.datetime`, 
+  the date part is trimmed. If value is a `dateime.date` (no time part), simple "00:00" timestamp is returned.
+
+
+- `to_datetime`: converts a string to `datetime.datetime` value with time zone info. If value is a `datetime.date`, 
+  the datetime object is extended with "00:00" timestamp. If value is a `datetime.time`, 
+  the object is extended with current date.
+
+
+> Raise `ParserError` if string format is invalid.
+
+
+> Missing year/month notified by double-dash "--" will be substituted with current date values.
+
+
+#### Example
+
+```
+>>> from skill_sdk.intents.entities import to_date, to_time, to_datetime
+>>> to_date("2106-12-31T12:30Z")
+datetime.date(2106, 12, 31)
+>>> to_time("2106-12-31T12:30Z")
+datetime.time(12, 30)
+>>> to_datetime("2106-12-31T12:30Z")
+datetime.datetime(2106, 12, 31, 12, 30, tzinfo=tzutc())
+>>> to_datetime("2106-12-")
+Traceback (most recent call last):
+  <skipped>
+dateutil.parser._parser.ParserError: Unknown string format: 2106-12-
+>>> to_datetime("---12-31T12:30Z")
+datetime.datetime(2021, 12, 31, 12, 30, tzinfo=tzutc())
+```
+
+### Type: `timedelta`
+
+Timedelta entities represent a time duration in ISO-8601 format. They can be converted to `datetime.timedelta` objects.
+
+#### Parsers
+
+- `to_timedelta`: converts an ISO-8601 duration string to `datetime.timedelta` value.
+
+> Raise `ISO8601Error` if string format is invalid.
+
+#### Example
+
+```
+>>> from skill_sdk.intents.entities import to_timedelta
+>>> to_timedelta("PT10M")
+datetime.timedelta(seconds=600)
+>>> to_timedelta("--PT10M")
+Traceback (most recent call last):
+  <skipped>
+isodate.isoerror.ISO8601Error: Unable to parse duration string '--PT10M'
+```
+
+### Type: `TimeRange`
+
+Time range represents a period in time between timestamps ("starting last Wednesday 15:00 until this Friday 10:00").
+It is transmitted as time interval in ISO-8601 format with start and end, separated by slash "/" symbol 
+("2007-03-01T13:00:00Z/2008-05-11T15:30:00Z").
+
+Time range can have an open start (then it begins on `datetime.datetime.min` timestamp) or open end 
+(in this case, it ends on `datetime.datetime.max`).   
+
+This type supports `in` operator, so you can check if a particular timestamp is **in** the time range.
+
+Another useful function is `TimeRange.range` - it's a generator yielding datetime values within a particular timeframe, 
+like hours/days/weeks/etc.   
+
+#### Parsers
+
+- `TimeRange`: converts an ISO-8601 interval string to `entities.TimeRange` object.
+
+> Raise `ParserError` if string format is invalid.
+
+
+#### Examples
+
+```
+>>> from skill_sdk.intents.entities import TimeRange
+>>> interval = TimeRange("2007-03-01T13:00:00Z/2008-05-11T15:30:00Z")
+>>> str(interval)
+'<TimeRange begin="2007-03-01 13:00:00+00:00" end="2008-05-11 15:30:00+00:00">'
+>>> TimeRange(None)
+Traceback (most recent call last):
+  <skipped>
+dateutil.parser._parser.ParserError: Unknown string format: None
+```
+
+**in** operator:
+
+```
+>>> from skill_sdk.intents.entities import TimeRange
+>>> interval = TimeRange("2007-03-01T13:00:00Z/2008-05-11T15:30:00Z")
+>>> from dateutil.tz import tzutc
+>>> datetime.datetime.now(tzutc()) in interval
+False
+```
+
+`TimeRange.range`:
+
+```
+>>> from skill_sdk.intents.entities import TimeRange
+>>> list(TimeRange("2019-02-08T12:27:20/2019-03-01T13:27:20").range("weeks"))
+[datetime.datetime(2019, 2, 8, 12, 27, 20), datetime.datetime(2019, 2, 15, 12, 27, 20), datetime.datetime(2019, 2, 22, 12, 27, 20), datetime.datetime(2019, 3, 1, 12, 27, 20)]
+```
+
+
+### Type: `TimeSet`
+
+Time set represents a recurring date/time event, such as "Every Monday at 8:00" 
+and transmitted as ISO-8601 repeating interval ("XXXX-WXX-1T08:00Z").
+
+Using `TimeSet.range` generator, you can yield recurring datetime values, 
+limiting the number of events by `count` parameter, or setting the end date with `until` parameter. 
+
+#### Parsers
+
+- `TimeSet`: converts an ISO-8601 repeating interval to `entities.TimeSet` object.
+
+> **Note:** Does not validate input string until `range` is called
+
+
+#### Examples
+
+```
+>>> from skill_sdk.intents.entities import TimeSet
+>>> t = TimeSet("invalid")
+>>> str(t)
+'<TimeSet timex="invalid" tz="tzutc()">'
+>>> TimeRange(None)
+Traceback (most recent call last):
+  <skipped>
+dateutil.parser._parser.ParserError: Unknown string format: None
+```
+
+`TimeSet.range`:
+
+```
+>>> from skill_sdk.intents.entities import TimeRange
+>>> t = TimeSet("invalid")
+>>> t.range(1)
+Traceback (most recent call last):
+  <skipped>
+ValueError: Could not parse timex value: "invalid", Unknown string format: invalidT00:00
+>>> list(TimeSet("T08:00").range(2))
+[datetime.datetime(2021, 4, 13, 8, 0, tzinfo=tzutc()), datetime.datetime(2021, 4, 14, 8, 0, tzinfo=tzutc())]
+>>> list(TimeSet("XXXX-WXX-1T08:00Z").range(2))
+[datetime.datetime(2021, 4, 19, 8, 0, tzinfo=tzutc()), datetime.datetime(2021, 4, 26, 8, 0, tzinfo=tzutc())]
+```
+
+
+### Type: `bool`
+
+Boolean entities represent logical states ("True"/"False") or state changes ("ON"/"OFF") and can be converted to `bool` objects.
+
+#### Parsers
+
+- `on_off_to_boolean`: convert boolean state string to `bool` value.
+
+> Raise `ValueError` if string format is invalid.
+
+#### Example
+
+```
+>>> from skill_sdk.intents.entities import on_off_to_boolean
+>>> on_off_to_boolean("On")
+True
+>>> on_off_to_boolean("0")
+False
+>>> on_off_to_boolean("")
+Traceback (most recent call last):
+  <skipped>
+ValueError: Cannot cast '' to boolean.
+>>> 
+```
+
+
+### Built-in Types: `int`, `float`, `complex`, `str`
+
+These entities extract correspondingly `int`, `float`, `complex`, `str` values from the utterance.
+
+In case of `str` type, string entities are simply passed over to the handler function as a string, no conversion occurs. 
+
+#### Parsers
+
+- `convert`: Parse string value applying a function to convert the value to particular type.
+
+> Raise `ValueError` if input string format is invalid.
+
+#### Example
+
+```
+>>> from skill_sdk.intents.entities import convert
+>>> convert(["0", "1", "2"], int)
+>>> convert("2", int)
+2
+>>> convert("4.2", float)
+4.2
+>>> convert("4.2", complex)
+(4.2+0j)
+>>> convert("4.2", int)
+Traceback (most recent call last):
+  <skipped>
+ValueError: invalid literal for int() with base 10: '4.2'
+```
+
+
+### Helper functions
+
+* entities.get_entity(entities: List[Any]) -> Optional[Any]
+    
+    Silently returns first element from entities list. Will return unchanged value if passed parameter is not an instance of list or tuple.
+    
+
+* entities.convert(value: str, to_type: Union[bool, datetime, int, float, Callable]) -> Any
+    
+    Generic converter: converts value to one of primitive types or any other type if conversion function supplied as `to_type` parameter.
+ 
+
+## Handling entities with decorator 
+
+To simplify the entities parsing and conversion, use `@skill.intent_handler` decorator.
+
+### @skill.intent_handler
+
+The decorator `@intent_handler` uses type hints from the handler definition and converts the entities list into the specified type.
+The following types are supported:
+- `datetime.timedelta`
+- `datetime.datetime` / `datetime.date` / `datetime.time`
+- `entities.TimeRange`
+- `entities.TimeSet`
+- `int` / `float` / `complex` / `str`
+- `bool`
+
+**Examples**
+
+To receive an entity converted to a single `datetime.timedelta` value:
+
+   ```python
+import datetime
+from skill_sdk import skill
+
+@skill.intent_handler('WEATHER__CURRENT')
+def intent_handler_expecting_timedelta(timedelta: datetime.timedelta):
+    ...
+   ```
+
+To receive a list of `datetime.date` values:
+
+   ```python
+import datetime
+from skill_sdk import skill
+
+@skill.intent_handler('WEATHER__CURRENT')
+def intent_handler_expecting_dates_list(date_list: [datetime.date]):
+    ...
+   ```
+   
+By default, `intent_handler` decorator suppresses conversion errors and returns an instance of 
+`EntityValueException` exception, if conversion error occurs. 
+
+You may add your own error handler to the `intent_handler` decorator to handle exceptions yourself:
+
+```python
+import datetime
+from skill_sdk import skill, tell
+
+
+def date_error(name, value, exception):
+    return tell(f"Wrong {name} value: {value}, exception {exception.__cause__}")
+
+@skill.intent_handler('Test_Intent', error_handler=date_error)
+def handler(date: datetime.date = None):
+  ...
+```
+
+## Nested and overlapping entities
+
 To receive the values in `AttributeV2` format, use the type hints when decorating your intent handler with `@intent_handler`.
 
 If you want to receive a list of `AttributeV2` values:
 
 ```python
 from typing import List
-from skill_sdk import entities, Response, skill
+from skill_sdk import skill
+from skill_sdk.intents.entities import AttributeV2
 
 @skill.intent_handler('TV__INTENT')
-def intent_handler_expecting_list_of_attributes_v2(channel: List[entities.AttributeV2]) -> Response:
+def intent_handler_expecting_list_of_attributes_v2(channel: List[AttributeV2]):
     ...
 ```
 
-To receive a single value (first one will be returned from the list):
+To receive a single value (a first one from the list):
 
 ```python
-from skill_sdk import entities, Response, skill
+from skill_sdk import skill
+from skill_sdk.intents.entities import AttributeV2
 
 @skill.intent_handler('TV__INTENT')
-def intent_handler_expecting_single_attribute_v2(channel: entities.AttributeV2) -> Response:
+def intent_handler_expecting_single_attribute_v2(channel: AttributeV2):
     ...
 ```
 
-To receive a list of `AttributeV2` that are definitely holding integer values: 
+To receive a list of `AttributeV2` that contain integer values: 
 
 ```python
 from typing import List
-from skill_sdk import entities, Response, skill
+from skill_sdk import skill
+from skill_sdk.intents.entities import AttributeV2
 
 @skill.intent_handler('TV__INTENT')
-def intent_handler_expecting_single_attribute_v2(channel: List[entities.AttributeV2[int]]) -> Response:
+def intent_handler_expecting_single_attribute_v2(channel: List[AttributeV2[int]]):
     ...
 ```

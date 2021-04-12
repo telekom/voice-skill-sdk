@@ -37,7 +37,7 @@ This is valid only for **ASK** responses (when skill prompts for something and e
 `request.context` object has the following attributes:
 
 - **intent**: The name of the intent that was called.
-- **attributes_v2**: Raw version of the attributes received in the request.
+- **attributes_v2**: [Intent entities and attributes](entities.md).
 - **attributes**: Attributes as simple value lists (for backward compatibility).
 - **locale**: Requested language in two-letter ISO 639-1 format (for example `de`).
 - **skill_id**: Optional skill ID.
