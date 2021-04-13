@@ -59,7 +59,7 @@ A hybrid skill is a type of skill which requires a local plugin (also called as 
 * the Deezer bot requires a local Deezer plugin running on the speaker, to manage the Deezer DRM.
 * the DECT skill requires a local plugin on the Magenta smart speaker to pilot the DECT chipset of the speaker.
 
-Further information [here](use_kits_and_actions.md)
+Further information [here](kits_and_actions.md)
 
 #### Context
 

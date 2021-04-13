@@ -2,7 +2,7 @@
 
 An intent handler is supposed to return a response to the user. A response may be a simple text, 
 a question expecting answer from the user. More complicated responses may present a companion app's (cApp) [card](#Cards),
-invoke [client kits](use_kits_and_actions.md) (such as playing a sound stream or setting an alarm),
+invoke [client kits](kits_and_actions.md) (such as playing a sound stream or setting an alarm),
 or schedule a [client task](client_tasks.md) execution (programmatically invoke other intents).
 
 
@@ -24,7 +24,7 @@ Optionally it may contain a card, push notification, session storage and result 
 - **card**: Response card. The card is sent to a user's companion app on a mobile device.
 - **push_notification**: Push notification. The notification to send to the device. 
 - **session**: Session attributes. Preliminary skill state storage that is kept until `RESPONSE_TYPE_TELL` ends the session. 
-- **result**: Additional storage used for debug info, [client kits](use_kits_and_actions.md) activation 
+- **result**: Additional storage used for debug info, [client kits](kits_and_actions.md) activation 
   and delayed [client tasks](client_tasks.md) execution.  
 
 ### Cards
