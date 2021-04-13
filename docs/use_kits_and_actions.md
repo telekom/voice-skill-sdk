@@ -8,8 +8,8 @@ For example to play a stream from a URL, add `AudioPlayer.play_stream` command:
 ```python
 from skill_sdk.responses import tell, AudioPlayer
 
-response = tell('Here is a massive stream from London!').with_command(
-    AudioPlayer.play_stream('http://uk1-pn.mixstream.net/8698.m3u'))
+response = tell("Here is a massive stream from London!").with_command(
+    AudioPlayer.play_stream("http://uk1-pn.mixstream.net/8698.m3u"))
 ```
 
 
@@ -47,33 +47,33 @@ Supported actions:
 ### Samples
 
 ```python
-from skill_sdk import tell, intent_handler
+from skill_sdk import tell, skill
 from skill_sdk.responses import AudioPlayer
 
-KOOL_STREAM = 'http://uk1-pn.mixstream.net/8698.m3u'
+KOOL_STREAM = "http://uk1-pn.mixstream.net/8698.m3u"
 
-@intent_handler('INTENT__PLAY')
+@skill.intent_handler("INTENT__PLAY")
 def play():
     """Intent activated when user says 'Play'"""
-    return tell('Here is a massive stream from London!').with_command(
+    return tell("Here is a massive stream from London!").with_command(
         AudioPlayer.play_stream(KOOL_STREAM))
 
-@intent_handler('INTENT__STOP')
+@skill.intent_handler("INTENT__STOP")
 def stop():
     """Intent activated when user says 'Stop'"""
-    return tell('Bye!').with_command(
-        AudioPlayer.stop('Stopping kool stream...'))
+    return tell("Bye!").with_command(
+        AudioPlayer.stop("Stopping kool stream..."))
 
-@intent_handler('INTENT__PAUSE')
+@skill.intent_handler("INTENT__PAUSE")
 def pause():
     """Intent activated when user says 'Pause'"""
-    return tell('Pausing kool stream...').with_command(
-        AudioPlayer.pause('Playback paused. To resume, say "resume".'))
+    return tell("Pausing kool stream...").with_command(
+        AudioPlayer.pause("Playback paused. To resume, say 'resume'."))
 
-@intent_handler('INTENT__RESUME')
+@skill.intent_handler("INTENT__RESUME")
 def resume():
     """Intent activated when user says 'Continue'"""
-    return tell('Resuming kool stream...').with_command(
+    return tell("Resuming kool stream...").with_command(
         AudioPlayer.resume())
 ```
 
@@ -94,17 +94,17 @@ Supported actions:
 ### Samples
 
 ```python
-from skill_sdk import tell, intent_handler
+from skill_sdk import tell, skill
 from skill_sdk.responses import Calendar
 
-@intent_handler('INTENT__SNOOZE')
+@skill.intent_handler("INTENT__SNOOZE")
 def snooze(time: int = None):
-    """Intent activated when user says 'Snooze 5 minutes'
+    """Intent activated when user says "Snooze 5 minutes"
 
     @param time: snooze time in minutes
     """
     seconds = time * 60 
-    return tell('Sleep well another %s seconds', seconds).with_command(
+    return tell("Sleep well another %s seconds" % seconds).with_command(
         Calendar.snooze_start(seconds))
 ```
 
@@ -147,25 +147,25 @@ System functions kit.
 ### Samples
 
 ```python
-from skill_sdk import tell, intent_handler
+from skill_sdk import tell, skill
 from skill_sdk.responses import System
 
-@intent_handler('VOLUME__UP')
+@skill.intent_handler("VOLUME__UP")
 def volume_up():
-    """Intent activated when user says 'Make it louder'"""
-    return tell('Volume up.').with_command(
+    """Intent activated when user says "Make it louder"""
+    return tell("Volume up.").with_command(
         System.volume_up())
 
-@intent_handler('VOLUME__DOWN')
+@skill.intent_handler("VOLUME__DOWN")
 def volume_down():
-    """Intent activated when user says 'Make it quieter'"""
-    return tell('Volume down.').with_command(
+    """Intent activated when user says "Make it quieter"""
+    return tell("Volume down.").with_command(
         System.volume_down())
 
-@intent_handler('GLOBAL__STOP')
+@skill.intent_handler("GLOBAL__STOP")
 def stop():
-    """Intent activated when user says 'Stop!'"""
-    return tell('Stopped.').with_command(
+    """Intent activated when user says "Stop!"""
+    return tell("Stopped.").with_command(
         System.stop())
 ```
 
@@ -190,16 +190,16 @@ Used by a timer skill to announce the end of a timer, or by calendar skill to fi
 ### Samples
 
 ```python
-from skill_sdk import tell, intent_handler
+from skill_sdk import tell, skill
 from skill_sdk.responses import Timer
 
-@intent_handler('TIMER__START')
+@skill.intent_handler("TIMER__START")
 def start():
     """Intent activated by an external reminder service"""
-    return tell('Here is your reminder!').with_command(
+    return tell("Here is your reminder!").with_command(
         Timer.set_timer())
 
-@intent_handler('TIMER__STOP')
+@skill.intent_handler("TIMER__STOP")
 def stop():
     """Intent activated when user says 'Stop!'"""
     return tell().with_command(

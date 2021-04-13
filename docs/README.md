@@ -25,9 +25,9 @@ This folder contains the voice skill SDK for Python documentation.
 
 - [Invoke Request](request.md)
 - [Intent Entities](entities.md)
+- [Response](response.md)
 
 TODO:
-- [Response](response.md)
 - [Circuit Breakers and Tracing](tracing.md)
 - [HTTP timeout exception](http_timeout_exception.md)
 - [Use_Kits & Actions](use_kits_and_actions.md)

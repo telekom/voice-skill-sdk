@@ -1,23 +1,31 @@
 # Responses
 
-An intent handler function can return three different types of objects. Any other returned object results in error.
+An intent handler is supposed to return a response to the user. A response may be a simple text, 
+a question expecting answer from the user. More complicated responses may present a companion app's (cApp) [card](#Cards),
+invoke [client kits](use_kits_and_actions.md) (such as playing a sound stream or setting an alarm),
+or schedule a [client task](client_tasks.md) execution (programmatically invoke other intents).
 
-## Response
 
-*`skill_sdk.responses.Response`*
+Valid response is an object of `skill_sdk.responses.Response` class. 
 
-Any valid call of an intent handler may return `Response` type object. 
-If a call of the intent is valid, the requested user action processed as intended. 
-Furthermore, it covered any exception from the normal processing that is handled by notifying the client/user about the result. 
-In other words: Everything that is not an unrecoverable error.
+> As a shorthand, you can also send simple text string as response. It will be converted to Response object.
+
+## `skill_sdk.responses.Response`
+
+Skill response consists of a text to be read out and response type (specifies if user answer is expected).
+Optionally it may contain a card, push notification, session storage and result data.
 
 `Response` class has the following attributes:
 
-- **type_**: Response type. Valid response types are `skill_sdk.responses.RESPONSE_TYPE_ASK`, `skill_sdk.responses.RESPONSE_TYPE_TELL` and `skill_sdk.responses.RESPONSE_TYPE_ASK_FREETEXT`.
-- **text**: Text message that client reads out to the user. It can be a question if response is of `RESPONSE_TYPE_ASK`/`RESPONSE_TYPE_ASK_FREETEXT` types, or a statement if it is `RESPONSE_TYPE_TELL`. If the text is wrapped in a `<speak>` tag, it is interpreted as SSML.
-- **card**: Response card. The card is sent to a user's companion app on the mobile device.
-- **result**: Additional storage used for debug info, client [kits](use_kits_and_actions.md) activation 
-  and delayed client [tasks](client_tasks.md) execution.  
+- **text**: Text message that client reads out to the user. If the text is wrapped in a `<speak>` tag, it is interpreted as SSML.
+- **type**: Response type. Valid response types are `skill_sdk.responses.RESPONSE_TYPE_TELL` (utter the text and end the session), 
+  `skill_sdk.responses.RESPONSE_TYPE_ASK` (utter the text and wait for a user answer), 
+  and `skill_sdk.responses.RESPONSE_TYPE_ASK_FREETEXT` (utter the text and wait for a user answer in free format).
+- **card**: Response card. The card is sent to a user's companion app on a mobile device.
+- **push_notification**: Push notification. The notification to send to the device. 
+- **session**: Session attributes. Preliminary skill state storage that is kept until `RESPONSE_TYPE_TELL` ends the session. 
+- **result**: Additional storage used for debug info, [client kits](use_kits_and_actions.md) activation 
+  and delayed [client tasks](client_tasks.md) execution.  
 
 ### Cards
 
@@ -108,7 +116,7 @@ response = Response().with_card(
 A re-prompt response is a special type of `RESPONSE_TYPE_ASK` response. It is implemented as a measure to limit a number of re-prompts.
 
 Suppose your skill receives a number that must be in a range between 1 and 10. 
-If user answers with a number outside of a range, you want to issue a re-prompt notifying user about erroneous input. 
+If user answers with a number outside a range, you want to issue a re-prompt notifying user about erroneous input. 
 If user again answers with a number outside, you issue a re-prompt once again.
 If user's input is again invalid, you might want to give up and stop re-prompting.  
 
@@ -119,16 +127,12 @@ When the number of re-prompts reaches maximum, a simple `RESPONSE_TYPE_TELL` is 
 
 *`skill_sdk.responses.ErrorResponse`*
 
-An intent handler can return an `ErrorResponse` explicitly. If intent handler fails, the `ErrorResponse` is also returned.
+An intent handler can return an `ErrorResponse` explicitly. 
+If intent handler fails with exception, the SDK will implicitly return `ErrorResponse` object.
 
 The following combinations of an `ErrorResponse` are defined:
 
 - **wrong intent**: `ErrorResponse(code=1, text="intent not found")` → *HTTP code: 404*
 - **invalid token**: `ErrorResponse(code=2, text="invalid token")` → *HTTP code: 400*
-- **locale,… missing**: `ErrorResponse(code=3, text="Bad request")` → *HTTP code: 400*
+- **bad request**: `ErrorResponse(code=3, text="Bad request")` → *HTTP code: 400*
 - **unhandled exception**: `ErrorResponse(code=999, text="internal error")` → *HTTP code: 500*
-
-## String
-
-If just a string is returned from the intent handler function, it is equivalent to returning `Response(text=the_returned_string)`.
-As a result, the text is read out to user.
