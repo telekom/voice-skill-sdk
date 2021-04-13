@@ -46,6 +46,8 @@ from skill_sdk.responses.response import (
 
 from skill_sdk.responses.reprompt import Reprompt
 
+from skill_sdk.responses.task import ClientTask, DelayedClientTask
+
 
 def tell(text: Text, **kwargs) -> Response:
     """
