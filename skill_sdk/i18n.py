@@ -161,9 +161,13 @@ class Message(str):
 class Translations(support.Translations):
     """Lazy translations, return Message object instead of formatted string"""
 
-    def __init__(self, lang: Text = None, fp=None):
+    def __init__(self, lang: Text = None, f=None):
         self.lang = lang
-        super().__init__(fp)
+        try:
+            with f.open(mode="rb") as fp:
+                super().__init__(fp)
+        except AttributeError:
+            super().__init__()
 
     def gettext(self, message, *args, **kwargs) -> Message:
         return Message(super().gettext(message), message, *args, **kwargs)
@@ -326,7 +330,7 @@ def _load_yaml(locale_dir: Text = None) -> Dict[Text, MultiStringTranslation]:
     logger.info("Loading YAML translations...")
 
     return {
-        yaml_file.stem: MultiStringTranslation(yaml_file.stem, yaml_file.open(mode="r"))
+        yaml_file.stem: MultiStringTranslation(yaml_file.stem, yaml_file)
         for yaml_file in get_locale_dir(locale_dir).glob("*.yaml")
         if RE_TRANSLATIONS.match(yaml_file.stem)
     }
@@ -344,7 +348,7 @@ def _load_gettext(locale_dir: Text = None) -> Dict[Text, Translations]:
 
     compile_locales(locale_dir)
     return {
-        mo_file.stem: Translations(mo_file.stem, mo_file.open(mode="rb"))
+        mo_file.stem: Translations(mo_file.stem, mo_file)
         for mo_file in get_locale_dir(locale_dir).glob("*.mo")
         if RE_TRANSLATIONS.match(mo_file.stem)
     }
