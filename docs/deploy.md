@@ -56,3 +56,17 @@ The sample startup log, notifying about successful startup:
 Deploy the skill in _development mode_ with built-in [Uvicorn](https://www.uvicorn.org/) server:
 
 `vs develop app.py`
+
+
+# Kubernetes Integration
+
+
+Along with Magenta skill-specific invoke and info endpoints, 
+skill SDK for Python provides liveness and readiness probes for Kubernetes environment.
+
+Their configuration is defined in skill settings:
+
+- **settings.K8S_READINESS**: Kubernetes readiness probe endpoint. Default: "/k8s/readiness".
+
+
+- **settings.K8S_LIVENESS**: Kubernetes liveness probe endpoint. Default: "/k8s/liveness".

@@ -1,13 +1,6 @@
 # Magenta Voice Skill SDK for Python
 
-This folder contains the voice skill SDK for Python documentation.
-
-* In the main folder you find documents that cover generic topics. 
-  The End-to-end Guide for Skill Development and Implementation section contains a complete guide to Magenta Voice Platform, 
-  and the tools to configure skills for Magenta Smart Speakers.
-  
-* The `howtos` section contains more practical documents that explain how to solve common problems.
- 
+This folder contains Magenta voice skill SDK for Python documentation.
 
 ## Content
 
@@ -20,29 +13,23 @@ This folder contains the voice skill SDK for Python documentation.
 - [Internationalization and Localization](i18n.md)
 - [Skill Catalog for Hallo Magenta App](catalog.md)
 - [Skill Configuration Reference](config.md)
+- [Deployment of the Skill](deploy.md)
 
 ### Request/Response
 
 - [Invoke Request](request.md)
 - [Intent Entities](entities.md)
 - [Response](response.md)
-
-TODO:
-- [Circuit Breakers and Tracing](tracing.md)
-- [HTTP timeout exception](http_timeout_exception.md)
 - [Use_Kits & Actions](use_kits_and_actions.md)
 - [Execute Client Tasks](client_tasks.md)
-
-### Deployment
-
-- [Deploy the Skill](deploy.md)
-- [Kubernetes Integrations](k8s.md)
-
 
 ### How To
 
 - [Simple Intent Examples](howtos/intent_example.md)
 - [How to use Persistence Service](howtos/persistence_service.md)
 - [Skill Manifest](howtos/skill_manifest.md)
+
+TODO:  
 - [How to make HTTP Requests](howtos/make_http_requests.md)
 - [Test a skill](howtos/testing.md)
+- Prometheus Metrics export
