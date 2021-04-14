@@ -26,10 +26,7 @@ This folder contains Magenta voice skill SDK for Python documentation.
 ### How To
 
 - [Simple Intent Examples](howtos/intent_example.md)
-- [How to use Persistence Service](howtos/persistence_service.md)
+- [Using Persistence Service](howtos/persistence_service.md)
+- [Using Web Services](howtos/web_services.md)
 - [Skill Manifest](howtos/skill_manifest.md)
-- [Test a skill](howtos/testing.md)
-
-TODO:  
-- [How to make HTTP Requests](howtos/make_http_requests.md)
-- Prometheus Metrics export
+- [Testing a skill](howtos/testing.md)
