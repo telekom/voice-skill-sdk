@@ -21,7 +21,6 @@ from skill_sdk.requests import (
     CircuitBreaker,
     CircuitBreakerState,
     HTTPError,
-    DEFAULT_CIRCUIT_BREAKER,
     DEFAULT_REQUESTS_TIMEOUT,
 )
 
@@ -32,7 +31,6 @@ LOCALHOST = "http://localhost/"
 class TestClient(unittest.TestCase):
     def test_init(self):
         zcbs = Client()
-        self.assertEqual(zcbs.circuit_breaker, DEFAULT_CIRCUIT_BREAKER)
         self.assertTrue(isinstance(zcbs, Client))
 
     def test_init_with_circuit_breaker(self):
@@ -97,4 +95,24 @@ async def test_request_fail_with_exclusion():
         assert route.called
     async with AsyncClient(exclude=[httpx.codes.NOT_FOUND]) as c:
         await c.get(LOCALHOST)
+        assert route.called
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_circuit_breaker():
+    route = respx.get(LOCALHOST).mock(return_value=httpx.Response(500))
+    with Client() as c:
+        fail_max = c.circuit_breaker.fail_max
+        for _ in range(fail_max * 10):
+            with pytest.raises(Exception):
+                c.get(LOCALHOST)
+        assert c.circuit_breaker.state.state == CircuitBreakerState.OPEN
+        assert route.call_count == fail_max
+
+    route.reset()
+    with Client() as c:
+        with pytest.raises(Exception):
+            c.get(LOCALHOST)
+        assert c.circuit_breaker.state.state == CircuitBreakerState.CLOSED
         assert route.called

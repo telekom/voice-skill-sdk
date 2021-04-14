@@ -29,11 +29,6 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_REQUESTS_TIMEOUT = settings.REQUESTS_TIMEOUT
 
-DEFAULT_CIRCUIT_BREAKER = CircuitBreaker(
-    fail_max=5,
-    timeout_duration=timedelta(seconds=60),
-)
-
 
 class Client(httpx.Client):
     """
@@ -63,7 +58,10 @@ class Client(httpx.Client):
         :param kwargs:          keyword arguments passed over to request
         """
         self.internal = internal
-        self.circuit_breaker = circuit_breaker or DEFAULT_CIRCUIT_BREAKER
+
+        # If no custom circuit breaker supplied, we'll create a new instance
+        self.circuit_breaker = circuit_breaker or CircuitBreaker()
+
         self.exclude = tuple(exclude) if exclude else ()
         super().__init__(timeout=timeout or DEFAULT_REQUESTS_TIMEOUT, **kwargs)
         if response_hook:
@@ -140,7 +138,10 @@ class AsyncClient(httpx.AsyncClient):
         :param kwargs:          keyword arguments passed over to request
         """
         self.internal = internal
-        self.circuit_breaker = circuit_breaker or DEFAULT_CIRCUIT_BREAKER
+
+        # If no custom circuit breaker supplied, we'll create a new instance
+        self.circuit_breaker = circuit_breaker or CircuitBreaker()
+
         self.exclude = tuple(exclude) if exclude else ()
         super().__init__(timeout=timeout or DEFAULT_REQUESTS_TIMEOUT, **kwargs)
         if response_hook:

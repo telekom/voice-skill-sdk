@@ -47,3 +47,25 @@ async def test_auth_headers():
             assert route.called
             assert response.json() == SERVICE_RESPONSE
             assert response.request.headers["Authorization"] == "Bearer eyJ"
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_circuit_breaker():
+    from aiobreaker import CircuitBreakerState
+
+    route = respx.get(SERVICE_URL).mock(return_value=Response(500))
+    service = BaseService(SERVICE_URL)
+    with service.client as c:
+        fail_max = c.circuit_breaker.fail_max
+        for _ in range(fail_max * 10):
+            with pytest.raises(Exception):
+                c.get(SERVICE_URL)
+        assert c.circuit_breaker.state.state == CircuitBreakerState.OPEN
+        assert route.call_count == fail_max
+
+    route.reset()
+    with service.client as c:
+        with pytest.raises(Exception):
+            c.get(SERVICE_URL)
+        assert not route.called

@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import respx
 import httpx
 from httpx import Response
+from aiobreaker import CircuitBreakerError
 
 from skill_sdk.middleware.prometheus import (
     Prometheus,
@@ -87,12 +88,24 @@ class TestPrometheus(unittest.TestCase):
             return_value=Response(500, text="")
         )
 
-        with Client(response_hook=count_partner_calls("partner-call")) as client:
-            with self.assertRaises(httpx.HTTPError):
-                [client.get("http://httpbin.org/status/404") for _ in range(1, 15)]
-            with self.assertRaises(httpx.HTTPError):
-                [client.get("http://httpbin.org/status/500") for _ in range(1, 15)]
+        with Client(response_hook=count_partner_calls("partner-call")) as c404:
+            for _ in range(100):
+                with self.assertRaises(Exception):
+                    c404.get("http://httpbin.org/status/404")
+
+        with Client(response_hook=count_partner_calls("partner-call")) as c500:
+            for _ in range(100):
+                with self.assertRaises(Exception):
+                    c500.get("http://httpbin.org/status/500")
 
         metrics = handle_metrics(SimpleNamespace()).body
-        self.assertIn(b'partner_name="partner-call",status="404"} 1.0', metrics)
-        self.assertIn(b'partner_name="partner-call",status="500"} 1.0', metrics)
+        self.assertIn(
+            b'partner_name="partner-call",status="404"} %d.0'
+            % c404.circuit_breaker.fail_max,
+            metrics,
+        )
+        self.assertIn(
+            b'partner_name="partner-call",status="500"} %d.0'
+            % c500.circuit_breaker.fail_max,
+            metrics,
+        )

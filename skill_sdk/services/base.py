@@ -13,6 +13,8 @@
 import logging
 from typing import Dict, Text, TypeVar
 
+from aiobreaker import CircuitBreaker
+
 from skill_sdk.intents import r
 from skill_sdk.requests import AsyncClient, Client
 
@@ -37,7 +39,11 @@ class BaseService:
     # Service name
     NAME: Text = "base"
 
-    # Service URL
+    # Circuit breaker:
+    #   shared between client instances (defaults: fail_max=5, timeout_duration=60 sec)
+    CIRCUIT_BREAKER = CircuitBreaker()
+
+    # Base service URL
     url: Text = ""
 
     # Timeout value
@@ -113,6 +119,7 @@ class BaseService:
             base_url=self.url,
             headers=self.headers,
             timeout=self.timeout,
+            circuit_breaker=self.CIRCUIT_BREAKER,
         )
 
     @property
@@ -124,4 +131,5 @@ class BaseService:
             base_url=self.url,
             headers=self.headers,
             timeout=self.timeout,
+            circuit_breaker=self.CIRCUIT_BREAKER,
         )
