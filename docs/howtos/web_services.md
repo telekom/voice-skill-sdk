@@ -1,4 +1,7 @@
-# How to make HTTP Requests
+# How to use HTTP Client/AsyncClient
+
+Skill SDK for Python includes an HTTP client based on [httpx](https://www.python-httpx.org/) 
+with integrated circuit breaker. 
 
 In our distributed microservice architecture, certain technical requirements allow the operators and us to trace calls through the system and to respond smartly to errors.
 
@@ -106,23 +109,3 @@ To overwrite the default timeout of 5 seconds, proceed as shown below:
 with CircuitBreakerSession() as session:
     session.get('http://service-text-service/api/v1/...', timeout=10)
 ```
-
-## Header based caching
-
-Caching that bases on HTTP headers is done automatically.
-By default, the cached elements are stored in a 1000 items `CacheControlLocalLRUCache`.
-
-You have the option to overwrite the size. To do so, set `skill_sdk.requests.DEFAULT_HTTP_CACHE.max_size`.
-
-You can also use a different cache. To do so, supply another `CacheControlLocalLRUCache` instance as the `cache` argument to
-a `CircuitBreakerSession`.
-
->Share one instance between requests. If you create a new instance for every request, no caching can take place.
-
-## Useful hints
-
->Always use the `CircuitBreakerSession`. 
-
->Do not use the session from requests for the `get()`, `post()` and so on convenience functions.
-
->Do not forget to instantiate the session `CircuitBreakerSession` → `CircuitBreakerSession()`.
