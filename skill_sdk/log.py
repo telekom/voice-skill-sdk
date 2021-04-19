@@ -142,6 +142,36 @@ def get_config_dict(log_level: int, log_format: config.FormatType) -> Dict:
     return conf[log_format]
 
 
+def patch_logger():
+    """
+    Patch the `logging.Logger.isEnabledFor` method.
+
+    :return:
+    """
+
+    from skill_sdk.middleware import HeaderKeys, context
+
+    _super = logging.Logger.isEnabledFor
+
+    def is_enabled_for(instance: logging.Logger, level):
+        """
+        Return True if "X-User-Debug-Log" flag is set
+
+        :param instance:    logging.Logger instance
+        :param level:       logging level
+        :return:
+        """
+        try:
+            return context.data[HeaderKeys.user_debug_log] or _super(instance, level)
+        except (KeyError, RuntimeError):
+            return _super(instance, level)
+
+    logging.Logger.isEnabledFor = is_enabled_for
+
+
+patch_logger()
+
+
 ###############################################################################
 #                                                                             #
 #  Limit log message size                                                     #

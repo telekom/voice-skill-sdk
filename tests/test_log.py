@@ -9,7 +9,9 @@
 #
 
 import json
+import logging
 from logging import makeLogRecord, INFO
+from unittest.mock import patch
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
@@ -30,6 +32,13 @@ async def index(request: Request):
     return JSONResponse(json.loads(log.CloudGELFFormatter().format(record)))
 
 
+@app.route("/log")
+async def index(request: Request):
+    logger = logging.getLogger(__name__)
+    logger.debug("Debug message")
+    return JSONResponse('ok')
+
+
 client = TestClient(app)
 
 
@@ -47,3 +56,20 @@ def test_log_record():
     assert [
         v for k, v in resp.json().items() if k in ("traceId", "spanId", "tenant")
     ] == expected
+
+
+def test_user_log():
+
+    with patch.object(logging.Logger, '_log') as mock_debug:
+        client.get(
+            "/log",
+        )
+        mock_debug.assert_not_called()
+
+        client.get(
+            "/log",
+            headers={
+                "x-user-debug-log": "1",
+            },
+        )
+        mock_debug.assert_called_once_with(10, "Debug message", ())

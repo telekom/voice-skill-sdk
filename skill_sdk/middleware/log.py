@@ -21,6 +21,7 @@ class HeaderKeys(str, Enum):
     span_id = "X-B3-SpanId"
     tenant_id = "X-TenantId"
     testing_flag = "X-Testing"
+    user_debug_log = "X-User-Debug-Log"
 
 
 class TraceIdPlugin(Plugin):
@@ -51,3 +52,12 @@ class TestingFlagPlugin(Plugin):
     """
 
     key = HeaderKeys.testing_flag
+
+
+class UserDebugLogPlugin(Plugin):
+    """
+    Extracts "user debug log" flag from request:
+    the flag is set to temporary activate debug logging for the user
+    """
+
+    key = HeaderKeys.user_debug_log

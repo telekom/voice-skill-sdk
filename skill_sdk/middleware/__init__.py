@@ -38,5 +38,6 @@ def setup_middleware(app):
             log.SpanIdIdPlugin(),
             log.TenantIdIdPlugin(),
             log.TestingFlagPlugin(),
+            log.UserDebugLogPlugin(),
         ),
     )
