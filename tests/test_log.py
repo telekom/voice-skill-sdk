@@ -36,7 +36,7 @@ async def index(request: Request):
 async def index(request: Request):
     logger = logging.getLogger(__name__)
     logger.debug("Debug message")
-    return JSONResponse('ok')
+    return JSONResponse("ok")
 
 
 client = TestClient(app)
@@ -60,7 +60,7 @@ def test_log_record():
 
 def test_user_log():
 
-    with patch.object(logging.Logger, '_log') as mock_debug:
+    with patch.object(logging.Logger, "_log") as mock_debug:
         client.get(
             "/log",
         )
