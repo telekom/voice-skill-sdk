@@ -11,9 +11,9 @@
 """Geolocation service"""
 
 import logging
-from typing import Optional, Text
+from typing import Dict, List, Optional, Text
 
-from skill_sdk.util import CamelModel
+from skill_sdk.util import CamelModel, root_validator
 from skill_sdk.services.base import BaseService
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,52 @@ class FullLocation(GeoLocation, Location):
     ...
 
 
+class FullAddress(CamelModel):
+    """Complete address including geo-coordinates"""
+
+    lat: float
+    lon: float  # ATTN: "lot" not "lng" (!)
+
+    country: Text
+    city: Text
+    postal_code: Text
+    street_name: Optional[Text]
+    street_number: Optional[Text]
+
+
+class FullAddressList(CamelModel):
+    """Result of address lookup service: list of FullAddress"""
+
+    __root__: List[FullAddress]
+
+
+class AddressLookupQuery(CamelModel):
+    """Query to address lookup service"""
+
+    country: Optional[Text]
+    postalcode: Optional[Text]  # noqa
+    street_name: Optional[Text]
+    street_number: Optional[Text]
+
+    lang: Optional[Text]
+
+    # Max number of search results
+    limit: int
+
+    @root_validator(pre=True)
+    def query_required(cls, values: Dict):  # pylint: disable=E0213
+        if not any(
+            (
+                values.get("country"),
+                values.get("postalcode"),
+                values.get("street_name"),
+                values.get("street_number"),
+            )
+        ):
+            raise ValueError("Query is missing or empty!")
+        return values
+
+
 class GeoLookupQuery(CamelModel):
     """Request to location service"""
 
@@ -66,6 +112,14 @@ class GeoLookupQuery(CamelModel):
     postalcode: Optional[Text]  # noqa
 
     lang: Optional[Text]
+
+    @root_validator(pre=True)
+    def query_required(cls, values: Dict):  # pylint: disable=E0213
+        if not any(
+            (values.get("country"), values.get("city"), values.get("postalcode"))
+        ):
+            raise ValueError("Query is missing or empty!")
+        return values
 
 
 class LocationService(BaseService):
@@ -113,3 +167,51 @@ class LocationService(BaseService):
 
             data = await client.get(f"{self.url}/reversegeo", params=location.dict())
             return Address(**data.json())
+
+    async def address_lookup(
+        self,
+        *,
+        country: Text = None,
+        postalcode: Text = None,  # noqa
+        street_name: Text = None,
+        street_number: Text = None,
+        lang: Text = None,
+        limit: int = 1,
+    ) -> FullAddressList:
+        """
+        Forward lookup: resolve geo-coordinates from textual address components
+
+        :param country:
+        :param postalcode:
+        :param street_name:
+        :param street_number:
+        :param lang:
+        :param limit:
+        :return:
+        """
+        async with self.async_client as client:
+            params = AddressLookupQuery(
+                country=country,
+                postalcode=postalcode,
+                street_name=street_name,
+                street_number=street_number,
+                lang=lang,
+                limit=limit,
+            )
+
+            data = await client.get(f"{self.url}/address", params=params.dict())
+            return FullAddressList.parse_obj(data.json())
+
+    async def device_location(self) -> FullAddress:
+        """
+        Retrieves device location: whatever user has setup in cApp, plus geo coordinates
+
+        (device serial number gets decoded from the service token,
+         so in order to use this function, parent request must contain the service token)
+
+        @return:
+        """
+
+        async with self.async_client as client:
+            data = await client.get(f"{self.url}/device-location")
+            return FullAddress(**data.json())

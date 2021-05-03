@@ -26,7 +26,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Mapping, Text, TypeVar,
 import orjson
 import pydantic
 import nest_asyncio
-from pydantic import validator, ValidationError  # noqa
+from pydantic import root_validator, validator, ValidationError  # noqa
 from pydantic.utils import lenient_issubclass
 import uvicorn
 
