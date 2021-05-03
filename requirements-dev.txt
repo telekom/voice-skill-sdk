@@ -1,5 +1,5 @@
 # Optional dev/test requirements:
-arrow==1.0.2              # [Better dates & times for Python](https://arrow.readthedocs.org)
+arrow==1.1.0              # [Better dates & times for Python](https://arrow.readthedocs.org)
 coverage==5.5             # [Code coverage measurement for Python](https://github.com/nedbat/coveragepy)
-requests-mock==1.8.0      # [Mocked responses for the requests library](https://requests-mock.readthedocs.io)
+requests-mock==1.9.2      # [Mocked responses for the requests library](https://requests-mock.readthedocs.io)
 jaeger-client==4.4.0      # [Native Jaeger client instrumentation library](https://github.com/jaegertracing/jaeger-client-python)
