@@ -11,6 +11,7 @@
 """Geolocation service"""
 
 import logging
+from json import JSONDecodeError
 from typing import Dict, List, Optional, Text
 
 from skill_sdk.util import CamelModel, root_validator
@@ -61,12 +62,12 @@ class FullLocation(GeoLocation, Location):
 class FullAddress(CamelModel):
     """Complete address including geo-coordinates"""
 
-    lat: float
-    lon: float  # ATTN: "lot" not "lng" (!)
+    lat: Optional[float]
+    lon: Optional[float]  # ATTN: "lot" not "lng" (!)
 
-    country: Text
-    city: Text
-    postal_code: Text
+    country: Optional[Text]
+    city: Optional[Text]
+    postal_code: Optional[Text]
     street_name: Optional[Text]
     street_number: Optional[Text]
 
@@ -74,7 +75,7 @@ class FullAddress(CamelModel):
 class FullAddressList(CamelModel):
     """Result of address lookup service: list of FullAddress"""
 
-    __root__: List[FullAddress]
+    __root__: List[Optional[FullAddress]]
 
 
 class AddressLookupQuery(CamelModel):
@@ -177,7 +178,7 @@ class LocationService(BaseService):
         street_number: Text = None,
         lang: Text = None,
         limit: int = 1,
-    ) -> FullAddressList:
+    ) -> Optional[FullAddressList]:
         """
         Forward lookup: resolve geo-coordinates from textual address components
 
@@ -200,7 +201,10 @@ class LocationService(BaseService):
             )
 
             data = await client.get(f"{self.url}/address", params=params.dict())
-            return FullAddressList.parse_obj(data.json())
+            try:
+                return FullAddressList.parse_obj(data.json())
+            except JSONDecodeError:
+                return None
 
     async def device_location(self) -> FullAddress:
         """

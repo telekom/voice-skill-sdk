@@ -51,6 +51,7 @@ LOOKUP_RESPONSE = [
         "streetName": "Karlsplatz",
     },
 ]
+LOCATION_RESPONSE = {"lat": 48.06696, "lon": 11.51111, "postalCode": "81479"}
 
 
 @respx.mock
@@ -88,6 +89,12 @@ async def test_address_lookup():
         await service.address_lookup()
 
     respx.get(f"{SERVICE_URL}/address").mock(
+        return_value=Response(200, text="")
+    )
+
+    assert await service.address_lookup(street_name="Karlsplatz") is None
+
+    respx.get(f"{SERVICE_URL}/address").mock(
         return_value=Response(200, json=LOOKUP_RESPONSE)
     )
 
@@ -100,9 +107,8 @@ async def test_address_lookup():
 async def test_device_location():
     service = LocationService(SERVICE_URL)
     respx.get(f"{SERVICE_URL}/device-location").mock(
-        return_value=Response(200, json=LOOKUP_RESPONSE)
+        return_value=Response(200, json=LOCATION_RESPONSE)
     )
 
     response = await service.device_location()
-    # TODO:
-    assert response == FullAddress.parse_obj()
+    assert response == FullAddress.parse_obj(LOCATION_RESPONSE)
