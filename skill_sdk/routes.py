@@ -12,9 +12,9 @@
 
 import logging
 import secrets
-from typing import Text, Union
+from typing import Text
 
-from fastapi import Depends, FastAPI, Request, Response, Security
+from fastapi import Depends, FastAPI, Request, Security
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from fastapi.security.http import (
@@ -26,7 +26,7 @@ from fastapi.security.http import (
 import skill_sdk.i18n
 from skill_sdk.config import settings
 from skill_sdk.__version__ import __version__
-from skill_sdk.intents import Context, invoke
+from skill_sdk.intents import invoke
 
 from skill_sdk.responses import SkillInfoResponse, SkillInvokeResponse
 

@@ -9,7 +9,6 @@
 
 """HTTP sync/async clients with circuit breaker"""
 
-from datetime import timedelta
 from typing import Callable, Iterable, List, Union
 import logging
 from warnings import warn
@@ -19,8 +18,8 @@ from httpx import codes, HTTPError, Response  # noqa
 
 from aiobreaker import (
     CircuitBreaker,
-    CircuitBreakerState,
-)  # noqa
+    CircuitBreakerState,  # noqa
+)
 
 from skill_sdk.config import settings
 from skill_sdk.log import tracing_headers
@@ -200,8 +199,8 @@ class CircuitBreakerSession(Client):
 
     def __init__(self, *args, **kwargs) -> None:
         warn(
-            f'"requests.CircuitBreakerSession" is deprecated.\n'
-            f'Please use "requests.Client" if you need a circuit breaker or "httpx.Client" if not.',
+            '"requests.CircuitBreakerSession" is deprecated.\n'
+            'Please use "requests.Client" if you need a circuit breaker or "httpx.Client" if not.',
             DeprecationWarning,
             stacklevel=2,
         )

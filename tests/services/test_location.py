@@ -88,9 +88,7 @@ async def test_address_lookup():
     with pytest.raises(ValueError):
         await service.address_lookup()
 
-    respx.get(f"{SERVICE_URL}/address").mock(
-        return_value=Response(200, text="")
-    )
+    respx.get(f"{SERVICE_URL}/address").mock(return_value=Response(200, text=""))
 
     assert await service.address_lookup(street_name="Karlsplatz") is None
 

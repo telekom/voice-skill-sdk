@@ -1,6 +1,4 @@
 #!/bin/bash
 
-# TODO:
-# exec ./scripts/lint
-
 python -m pytest --cov=./skill_sdk --cov-report=term-missing tests ${@}
+exec ./scripts/lint

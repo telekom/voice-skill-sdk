@@ -11,7 +11,7 @@
 """Base for internal services"""
 
 import logging
-from typing import Dict, Text, TypeVar
+from typing import Dict, Text
 
 from aiobreaker import CircuitBreaker
 

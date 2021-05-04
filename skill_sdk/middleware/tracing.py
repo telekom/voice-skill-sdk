@@ -58,7 +58,7 @@ class start_span(ContextDecorator):
         return self._span.__exit__(_exc_type, _exc_value, _exc_traceback)
 
 
-def setup(app: FastAPI, tracer) -> None:
+def setup(app: FastAPI, tracer: Tracer) -> None:
     """
     Setup tracing: register a middleware and set global tracer instance
 

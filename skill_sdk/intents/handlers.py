@@ -9,7 +9,6 @@
 
 """Type hints processing and intent handler invoke"""
 
-import copy
 import inspect
 import logging
 from typing import (

@@ -180,7 +180,7 @@ class LocationService(BaseService):
         limit: int = 1,
     ) -> Optional[FullAddressList]:
         """
-        Forward lookup: resolve geo-coordinates from textual address components
+        Address lookup: get a list of addresses (with geo-coordinates) for a given query
 
         :param country:
         :param postalcode:
