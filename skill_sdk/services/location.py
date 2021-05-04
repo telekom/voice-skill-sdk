@@ -145,7 +145,7 @@ class LocationService(BaseService):
                     result = get(url, params=location_params, headers=self._headers())
                 return result.json()
             except (json.decoder.JSONDecodeError, requests.exceptions.RequestException) as ex:
-                logger.error(f"{self.url}/geo?{location_params} responded with error: {ex}")
+                logger.error("%s/geo?%s responded with error: %s", self.url, location_params, ex)
                 if isinstance(ex, requests.exceptions.RequestException):
                     raise
 
@@ -160,7 +160,21 @@ class LocationService(BaseService):
                     result = get(url, params=params, headers=self._headers())
                 return result.json()
             except (json.decoder.JSONDecodeError, requests.exceptions.RequestException) as ex:
-                logger.error(f"{self.url}/reversegeo?{params} responded with error: {ex}")
+                logger.error("%s/reversegeo?%s responded with error: %s", self.url, params, ex)
+                if isinstance(ex, requests.exceptions.RequestException):
+                    raise
+
+    @prometheus_latency('service-location.device_location')
+    @CallCache([LocalFIFOCache(max_size=100)])
+    def device_location(self):
+        url = f'{self.url}/device-location'
+        with self.session as session:
+            try:
+                with partner_call(session.get, LocationService.NAME) as get:
+                    result = get(url, headers=self._headers())
+                return result.json()
+            except (json.decoder.JSONDecodeError, requests.exceptions.RequestException) as ex:
+                logger.error("%s/device-location responded with error: %s", self.url, ex)
                 if isinstance(ex, requests.exceptions.RequestException):
                     raise
 

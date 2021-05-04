@@ -14,7 +14,7 @@ from unittest.mock import patch
 from configparser import ConfigParser
 from skill_sdk import l10n
 from skill_sdk.requests import BadHttpResponseCodeException
-from skill_sdk.services.location import Location
+from skill_sdk.services.location import Location, LocationService
 import requests_mock
 
 l10n.translations = {'de': l10n.Translations()}
@@ -174,3 +174,27 @@ class TestEntityLocation(unittest.TestCase):
             'http://service-location-service:1555/v1/location/geo',
             headers={'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJ123'},
             params={'text': 'some place'})
+
+
+class TestDeviceLocation(unittest.TestCase):
+
+    @requests_mock.mock()
+    def test_device_location(self, req_mock):
+        service = LocationService()
+
+        req_mock.get('http://service-location-service:1555/v1/location/device-location',
+                     text='{"lat":48.06696,"lon":11.51111,"postalCode":"81479"}')
+
+        r = service.device_location()
+        self.assertEqual(r, {'lat': 48.06696, 'lon': 11.51111, 'postalCode': '81479'})
+
+    @requests_mock.mock()
+    def test_device_location_error(self, req_mock):
+        service = LocationService()
+
+        req_mock.get('http://service-location-service:1555/v1/location/device-location', text='')
+        self.assertIsNone(service.device_location())
+
+        req_mock.get('http://service-location-service:1555/v1/location/device-location', text='{}', status_code=500)
+        with self.assertRaises(BadHttpResponseCodeException):
+            service.device_location()
