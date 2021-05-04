@@ -71,7 +71,7 @@ def to_timedelta(value) -> datetime.timedelta:
 
 @to_timedelta.register(datetime.timedelta)
 def __to_timedelta(value: datetime.timedelta):
-    """ No-op if already converted """
+    """No-op if already converted"""
     return value
 
 

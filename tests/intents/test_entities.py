@@ -135,7 +135,7 @@ class TestEntityTimeRange(unittest.TestCase):
         )
 
     def test_range_open(self):
-        """ Test datetime range with open begin/end """
+        """Test datetime range with open begin/end"""
 
         open_start = TimeRange("/2019-12-31T23:59:59")
         self.assertTrue(

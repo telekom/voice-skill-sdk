@@ -29,7 +29,7 @@ from skill_sdk.util import create_request, mock_datetime_now
 
 class TestHandlerDecorator(unittest.TestCase):
     def test_handler_no_type_hints(self):
-        """ Throw exception if no type hints """
+        """Throw exception if no type hints"""
         with self.assertRaises(ValueError):
 
             @intent_handler
@@ -37,7 +37,7 @@ class TestHandlerDecorator(unittest.TestCase):
                 return None
 
     def test_handler_no_type_hints_param(self):
-        """ Throw exception if no type hints """
+        """Throw exception if no type hints"""
         with self.assertRaises(ValueError):
 
             @intent_handler
@@ -54,7 +54,7 @@ class TestHandlerDecorator(unittest.TestCase):
         self.assertEqual(result, (r.context, "Europe/Berlin"))
 
     def test_handler_array(self):
-        """ Check simple usage with no conversion """
+        """Check simple usage with no conversion"""
 
         @intent_handler
         def decorated_test(arr: List[str]):
@@ -77,7 +77,7 @@ class TestHandlerDecorator(unittest.TestCase):
         )
 
     def test_handler_dates(self):
-        """ Check handler usage with date conversion """
+        """Check handler usage with date conversion"""
 
         @intent_handler
         def decorated_test(date_str: str = None, date_date: datetime.date = None):
@@ -98,7 +98,7 @@ class TestHandlerDecorator(unittest.TestCase):
         self.assertEqual(result, ("2001-12-31", datetime.date(2001, 12, 31)))
 
     def test_handler_date_array(self):
-        """ Check usage with date array """
+        """Check usage with date array"""
 
         @intent_handler
         def decorated_test(date_arr: [datetime.date]):
@@ -117,7 +117,7 @@ class TestHandlerDecorator(unittest.TestCase):
         )
 
     def test_handler_date_fail(self):
-        """ Test date conversion of invalid date """
+        """Test date conversion of invalid date"""
 
         @intent_handler(False)
         def decorated_test(date: datetime.date):
@@ -128,7 +128,7 @@ class TestHandlerDecorator(unittest.TestCase):
             result = decorated_test(r)
 
     def test_handler_fail_silent(self):
-        """ Test date conversion of invalid date in "silent" mode """
+        """Test date conversion of invalid date in "silent" mode"""
 
         @intent_handler
         def date_test(date: datetime.date):
@@ -165,7 +165,7 @@ class TestHandlerDecorator(unittest.TestCase):
         self.assertEqual(m.call_count, 2)
 
     def test_with_error_handler(self):
-        """ Test conversion failure if error_handler provided """
+        """Test conversion failure if error_handler provided"""
         from skill_sdk.intents import ErrorHandlerType
 
         error_handler: ErrorHandlerType
@@ -189,7 +189,7 @@ class TestHandlerDecorator(unittest.TestCase):
         self.assertIsNone(date_test(create_request("TEST_CONTEXT", date=[])))
 
     def test_handler_direct_call(self):
-        """ Test direct call: no conversion """
+        """Test direct call: no conversion"""
 
         @intent_handler
         def decorated_test(date: datetime.date):
@@ -224,7 +224,7 @@ class TestHandlerDecorator(unittest.TestCase):
         datetime.datetime(year=2100, month=12, day=31, hour=15), datetime
     )
     def test_multiple_date_values(self):
-        """ Improve LUIS weekday parsing """
+        """Improve LUIS weekday parsing"""
         from dateutil.tz import tzutc
 
         @intent_handler
