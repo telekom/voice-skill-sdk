@@ -14,6 +14,8 @@ import logging
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Text
 
+import httpx
+
 from skill_sdk.util import CamelModel, root_validator
 from skill_sdk.services.base import BaseService
 
@@ -63,7 +65,7 @@ class FullAddress(CamelModel):
     """Complete address including geo-coordinates"""
 
     lat: Optional[float]
-    lon: Optional[float]  # ATTN: "lot" not "lng" (!)
+    lon: Optional[float]  # ATTN: "lon" not "lng" (!)
 
     country: Optional[Text]
     city: Optional[Text]
@@ -71,11 +73,25 @@ class FullAddress(CamelModel):
     street_name: Optional[Text]
     street_number: Optional[Text]
 
+    def __bool__(self):
+        return any(
+            (
+                self.country,
+                self.city,
+                self.postal_code,
+                self.street_name,
+                self.street_number,
+            )
+        )
+
 
 class FullAddressList(CamelModel):
     """Result of address lookup service: list of FullAddress"""
 
     __root__: List[Optional[FullAddress]]
+
+    def __bool__(self):
+        return bool(self.__root__)
 
 
 class AddressLookupQuery(CamelModel):
@@ -200,11 +216,12 @@ class LocationService(BaseService):
                 limit=limit,
             )
 
-            data = await client.get(f"{self.url}/address", params=params.dict())
-            try:
-                return FullAddressList.parse_obj(data.json())
-            except JSONDecodeError:
-                return None
+            data = await client.request(
+                "GET", f"{self.url}/address",
+                params=params.dict(),
+                exclude=[httpx.codes.NOT_FOUND]
+            )
+            return FullAddressList.parse_obj(data.json() if data.text else [])
 
     async def device_location(self) -> FullAddress:
         """
@@ -217,5 +234,7 @@ class LocationService(BaseService):
         """
 
         async with self.async_client as client:
-            data = await client.get(f"{self.url}/device-location")
-            return FullAddress(**data.json())
+            data = await client.request(
+                "GET", f"{self.url}/device-location", exclude=[httpx.codes.NOT_FOUND]
+            )
+            return FullAddress(**data.json() if data.text else {})

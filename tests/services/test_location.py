@@ -7,6 +7,7 @@
 # For details see the file LICENSE in the top directory.
 #
 
+import json
 import respx
 import pytest
 from httpx import Response
@@ -88,9 +89,12 @@ async def test_address_lookup():
     with pytest.raises(ValueError):
         await service.address_lookup()
 
-    respx.get(f"{SERVICE_URL}/address").mock(return_value=Response(200, text=""))
+    respx.get(f"{SERVICE_URL}/address").mock(return_value=Response(200, text="Invalid response"))
+    with pytest.raises(json.JSONDecodeError):
+        await service.address_lookup(street_name="Karlsplatz")
 
-    assert await service.address_lookup(street_name="Karlsplatz") is None
+    respx.get(f"{SERVICE_URL}/address").mock(return_value=Response(404, text=""))
+    assert bool(await service.address_lookup(street_name="Karlsplatz")) is False
 
     respx.get(f"{SERVICE_URL}/address").mock(
         return_value=Response(200, json=LOOKUP_RESPONSE)
@@ -104,6 +108,14 @@ async def test_address_lookup():
 @pytest.mark.asyncio
 async def test_device_location():
     service = LocationService(SERVICE_URL)
+
+    respx.get(f"{SERVICE_URL}/device-location").mock(
+        return_value=Response(404, text="")
+    )
+
+    response = await service.device_location()
+    assert bool(response) is False
+
     respx.get(f"{SERVICE_URL}/device-location").mock(
         return_value=Response(200, json=LOCATION_RESPONSE)
     )
