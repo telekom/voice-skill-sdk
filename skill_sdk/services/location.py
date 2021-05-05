@@ -217,9 +217,10 @@ class LocationService(BaseService):
             )
 
             data = await client.request(
-                "GET", f"{self.url}/address",
+                "GET",
+                f"{self.url}/address",
                 params=params.dict(),
-                exclude=[httpx.codes.NOT_FOUND]
+                exclude=[httpx.codes.NOT_FOUND],
             )
             return FullAddressList.parse_obj(data.json() if data.text else [])
 
