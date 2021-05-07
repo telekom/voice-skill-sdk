@@ -1,7 +1,7 @@
 #
 # voice-skill-sdk
 #
-# (C) 2021, YOUR_NAME (YOUR COMPANY), Deutsche Telekom AG
+# (C) 2021, YOUR_NAME (YOUR COMPANY)
 #
 # This file is distributed under the terms of the MIT license.
 # For details see the file LICENSE in the top directory.
@@ -12,7 +12,7 @@
 
 import pytest
 from skill_sdk import skill
-from impl import hello
+from . import handler
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def app():
     :return:
     """
     app = skill.init_app()
-    app.include(handler=hello.handler)
+    app.include(handler=handler)
     return app
 
 

@@ -1,0 +1,25 @@
+"""Unit tests suite"""
+
+import pytest
+from skill_sdk import skill
+from . import (
+{{ intents|join(',\n', attribute='function')|indent(4, first=True) }}
+)
+
+
+@pytest.fixture
+def app():
+    """Pytest fixture to create an app for testing"""
+
+    app = skill.init_app()
+    {% for intent in intents -%}
+    app.include("{{ intent.name }}", handler={{ intent.function }})
+    {% endfor -%}
+    return app
+{% for intent in intents %}
+
+@pytest.mark.asyncio
+async def test_{{ intent.function }}(app):
+    response = await app.test_intent("{{ intent.name }}")
+    assert response.text == "Hello from {{ intent.name }}"
+{% endfor -%}

@@ -1,0 +1,16 @@
+"""
+Automatically rendered runner for the intents:
+
+{% for intent in intents %}    - "{{ intent.name }}"
+{% endfor %}
+"""
+
+from skill_sdk import skill
+from impl import (
+{{ intents|join(',\n', attribute='function')|indent(4, first=True) }}
+)
+
+app = skill.init_app(develop=True)
+{% for intent in intents -%}
+app.include("{{ intent.name }}", handler={{ intent.function }})
+{% endfor -%}

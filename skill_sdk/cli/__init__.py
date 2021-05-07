@@ -55,16 +55,12 @@ def add_logging_options(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def import_module_app(
-    import_from: Text, reload: bool = False
-) -> Tuple[ModuleType, Skill]:
+def import_module_app(import_from: Text) -> Tuple[ModuleType, Skill]:
     """
-    Import application from either python file or directory
+    Import application from python module or package
 
-    :param import_from: module name, can be in following formats:
+    :param import_from: module or package name, can be in following formats:
                         "app.py", "app:app" or "app_dir"
-
-    :param reload:      If True the module (and a single level of submodules is reloaded)
 
     :return:
     """
@@ -72,10 +68,10 @@ def import_module_app(
 
     path = pathlib.Path(module_str)
 
-    # Append current directory to sys.path
+    # Insert current directory to sys.path
     cwd = pathlib.Path("").absolute().__str__()
     if cwd not in sys.path:
-        sys.path.append(cwd)
+        sys.path.insert(0, cwd)
 
     if path.suffix == ".py":
         module = importlib.import_module(path.stem)
@@ -84,25 +80,17 @@ def import_module_app(
         [
             importlib.import_module("." + _.stem, _.parent.name)
             for _ in path.iterdir()
-            if _.is_file() and _.suffix == ".py"
+            if _.is_file() and _.suffix == ".py" and _.stem != "__init__"
         ]
     else:
         module = importlib.import_module(module_str)
 
-    if reload:
-        reload_submodules(module)
-
     # Return imported module (and possibly, the name of application variable, eg `main:app`)
-    return module, getattr(module, app_str, None)
+    app = getattr(module, app_str, None)
 
+    # Add link to the originating module
+    # for source reloading and intent handler updates from UI
+    if isinstance(app, Skill):
+        setattr(app, "_module", module)
 
-def reload_submodules(module):
-    """
-    Reload a module with one level of submodules
-    """
-    importlib.reload(module)
-    [
-        importlib.reload(getattr(module, _))
-        for _ in dir(module)
-        if type(getattr(module, _)) is ModuleType
-    ]
+    return module, app

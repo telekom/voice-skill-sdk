@@ -2,3 +2,5 @@
 set -e
 
 vs version
+
+

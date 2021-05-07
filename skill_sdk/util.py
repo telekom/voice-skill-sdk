@@ -321,6 +321,19 @@ def mock_datetime_now(target, dt):
     return unittest.mock.patch.object(dt, "datetime", dt_mock)
 
 
+def mock_date_today(now):
+    """
+    Patch datetime.date.today
+    """
+
+    class MockedDate(datetime.date):
+        @classmethod
+        def today(cls):
+            return now
+
+    return unittest.mock.patch.object(datetime, "date", MockedDate)
+
+
 def create_request(
     intent: Text, session: Union[CamelModel, Dict[Text, Text]] = None, **kwargs
 ):

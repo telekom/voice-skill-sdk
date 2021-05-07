@@ -33,6 +33,29 @@ def debug_logging(monkeypatch):
     return True
 
 
+@pytest.fixture
+def change_dir(monkeypatch):
+    """Set current dir to the path of `scaffold` project"""
+
+    scaffold_path = pkg_resources.resource_filename(init.__name__, "scaffold")
+    monkeypatch.chdir(scaffold_path)
+    cwd = pathlib.Path(scaffold_path).absolute().__str__()
+    if cwd not in sys.path:
+        monkeypatch.syspath_prepend(cwd)
+    return scaffold_path
+
+
+@pytest.fixture
+def app(change_dir, monkeypatch):
+    _, app = import_module_app(APP)
+    yield app
+    app.close()
+
+    # Cleanup: remove imported modules
+    del sys.modules["app"]
+    del sys.modules["impl"]
+
+
 def test_import_module_app():
 
     sdk, _ = import_module_app("skill_sdk")
@@ -46,41 +69,23 @@ def test_import_module_app():
     assert cli is test_cli
 
 
-def test_run(debug_logging, mocker, monkeypatch):
-
-    scaffold_path = pkg_resources.resource_filename(run.__name__, "scaffold")
-    cwd = pathlib.Path(scaffold_path).absolute().__str__()
-    if cwd not in sys.path:
-        monkeypatch.syspath_prepend(cwd)
+def test_run(debug_logging, mocker, app):
 
     uv = mocker.patch.object(run, "uvicorn")
-    _, app = import_module_app(APP)
     assert list(app.intents.keys()) == ["SMALLTALK__GREETINGS"]
 
     run.execute(Namespace(module=APP))
     uv.run.assert_called_once_with(app, port=4242)
 
 
-def test_develop(debug_logging, mocker, monkeypatch):
-
-    scaffold_path = pkg_resources.resource_filename(develop.__name__, "scaffold")
-    cwd = pathlib.Path(scaffold_path).absolute().__str__()
-    if cwd not in sys.path:
-        monkeypatch.syspath_prepend(cwd)
+def test_develop(debug_logging, mocker, app):
 
     uv = mocker.patch.object(develop, "uvicorn")
-
-    #
-    # In the previous test `app` object was _closed_
-    # so we have to force reload the submodules to return
-    # previously deleted static intent handlers
-    #
-    _, app = import_module_app(APP, reload=True)
 
     assert list(app.intents.keys()) == ["SMALLTALK__GREETINGS"]
 
     develop.execute(Namespace(module=APP))
-    uv.run.assert_called_once_with(APP, reload=True, port=4242)
+    uv.run.assert_called_once_with(app, port=4242)
 
 
 def test_init(tmpdir):
@@ -88,7 +93,8 @@ def test_init(tmpdir):
     init.execute(Namespace(out=tmpdir))
 
     required_files = [
-        "impl/hello.py",
+        "impl/__init__.py",
+        "impl/test_impl.py",
         "locale/de.po",
         "locale/en.po",
         "locale/fr.po",
@@ -96,11 +102,11 @@ def test_init(tmpdir):
         "scripts/run",
         "scripts/test",
         "scripts/version",
-        "tests/test_hello.py",
         "app.py",
         "Dockerfile",
         "README.md",
         "requirements.txt",
+        "requirements-dev.txt",
         "skill.conf",
     ]
     assert all((pathlib.Path(tmpdir) / file).exists() for file in required_files)
@@ -119,20 +125,8 @@ def test_version(capsys: CaptureFixture, mocker):
     assert "0.1" in out.out
 
 
-@pytest.fixture
-def change_dir(request):
-    """Fixture: set current dir to the path of `scaffold` project, and revert after the test"""
-
-    scaffold_path = pkg_resources.resource_filename(init.__name__, "scaffold")
-    os.chdir(scaffold_path)
-    yield
-    os.chdir(request.config.invocation_dir)
-
-
-def test_scaffold(change_dir):
+def test_scaffold(app):
     """Run scaffold project testing suite"""
-
-    _, app = import_module_app("app:app", reload=True)
 
     response = run_until_complete(app.test_intent("SMALLTALK__GREETINGS"))
     assert response.text == "HELLOAPP_HELLO"
