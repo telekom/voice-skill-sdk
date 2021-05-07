@@ -7,11 +7,9 @@
 # For details see the file LICENSE in the top directory.
 #
 #
-
 import unittest
 import datetime
 from datetime import timedelta
-from dateutil import parser
 from dateutil.tz import tzutc, tzoffset
 
 from skill_sdk.intents import entities
@@ -20,6 +18,7 @@ from skill_sdk.intents.entities import (
     TimeSet,
     AttributeV2,
     on_off_to_boolean,
+    rank,
     convert,
 )
 from skill_sdk.util import mock_datetime_now
@@ -40,6 +39,25 @@ class TestEntityOnOff(unittest.TestCase):
                 on_off_to_boolean(value)
 
 
+class TestEntityRank(unittest.TestCase):
+    def test_bad_value(self):
+        with self.assertRaises(ValueError):
+            rank("succ")
+
+    def test_value_min(self):
+        self.assertEqual(rank("min"), 0)
+
+    def test_value_max(self):
+        self.assertEqual(rank("max"), -1)
+
+    def test_value_prec(self):
+        self.assertEqual(rank("prec"), -2)
+
+    def test_value(self):
+        for value in ("1", "5", "8"):
+            self.assertEqual(rank(value), int(value) - 1)
+
+
 class TestEntityTimeRange(unittest.TestCase):
     def test_init(self):
         r = TimeRange("2019-02-08T12:27:20Z/2019-02-08T13:27:20Z")
@@ -57,9 +75,6 @@ class TestEntityTimeRange(unittest.TestCase):
         )
         self.assertEqual(TimeRange("2019-02-08T12:27:20Z/2019-02-08T13:27:20Z"), r)
         self.assertNotEqual(r, 1)
-
-        with self.assertRaises(parser.ParserError):
-            TimeRange("")
 
     def test_contains(self):
         r = TimeRange("2019-02-08T12:27:20/2019-02-08T13:27:20")

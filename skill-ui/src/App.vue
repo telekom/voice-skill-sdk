@@ -1,9 +1,10 @@
 <template>
   <v-app>
       <v-tabs>
-        <v-tab disabled>Design</v-tab>
+        <v-tab>Design</v-tab>
         <v-tab>Test</v-tab>
         <v-tab-item>
+          <DesignIntent/>
         </v-tab-item>
         <v-tab-item>
           <TestIntent/>
@@ -13,12 +14,14 @@
 </template>
 
 <script>
+import DesignIntent from './components/DesignIntent';
 import TestIntent from './components/TestIntent';
 
 export default {
   name: 'App',
 
   components: {
+    DesignIntent,
     TestIntent,
   },
 

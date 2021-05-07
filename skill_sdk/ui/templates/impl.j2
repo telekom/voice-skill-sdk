@@ -1,0 +1,23 @@
+"""
+Automatically rendered handlers for the intents:
+
+{% for intent in intents %}    - "{{ intent.name }}"
+{% endfor %}
+"""
+
+{{ imports|join('\n') }}
+{% for intent in intents %}
+
+@skill.intent_handler("{{ intent.name }}")
+async def {{ intent.function }}(
+{{ intent.parameters|join(',\n', attribute='as_code')|indent(4, first=True) }}
+) -> Response:
+    """
+    "{{ intent.name }}" handler implementation
+{% for param in intent.parameters %}
+    :param {{ param.name }}:
+{%- endfor %}
+    :return:
+    """
+    return Response("Hello from {{ intent.name }}")
+{% endfor -%}

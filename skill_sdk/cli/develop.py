@@ -41,18 +41,14 @@ def execute(arguments):
     """
     from skill_sdk import config, log, skill
 
-    reload = True
     log.setup_logging(logging.DEBUG, config.FormatType.HUMAN)
 
     module_str, _, app_str = arguments.module.partition(":")
-    if reload and app_str:
-        config.settings.SKILL_DEBUG = True
+    config.settings.SKILL_DEBUG = True
 
     module, app = import_module_app(arguments.module)
     if app is None:
-        app = skill.init_app(develop=True)
-        # Cannot activate "reload" mode if application object not in format "file:app"
-        reload = False
+        app = skill.init_app()
 
     logger.info("Loaded app: %s", repr(app))
     logger.info("Loaded handlers: %s", list(app.intents))
@@ -62,7 +58,7 @@ def execute(arguments):
     logger.info("Starting app with config: %s", repr(run_config))
 
     with closing(app):
-        uvicorn.run(arguments.module if reload else app, reload=reload, **run_config)
+        uvicorn.run(app, **run_config)
 
 
 def add_subparser(subparsers):

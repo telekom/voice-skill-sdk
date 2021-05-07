@@ -1,4 +1,5 @@
 #!/bin/bash
 
 python -m pytest --cov=./skill_sdk --cov-report=term-missing tests ${@}
-exec ./scripts/lint
+black skill_sdk tests --check --exclude tests/ui/skill
+mypy skill_sdk

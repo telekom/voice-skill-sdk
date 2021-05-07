@@ -12,7 +12,7 @@
 import inspect
 import logging
 from functools import partial
-from types import MappingProxyType
+from types import MappingProxyType, ModuleType
 from typing import Any, Callable, Dict, Mapping, Text, Union
 from fastapi import FastAPI
 
@@ -159,7 +159,7 @@ class Skill(FastAPI):
 
         if callable(intent) and handler is None:
             # If used as simple decorator, i.e.:
-            # ```
+            #
             #   @intent_handler
             #   async def handler():
             #
@@ -195,6 +195,15 @@ class Skill(FastAPI):
 
         return await invoke(handler, r)
 
+    @property
+    def module(self) -> ModuleType:
+        try:
+            return getattr(self, "_module")
+        except AttributeError:
+            raise RuntimeError(
+                '"module" property is only available in DEVELOPMENT mode.'
+            ) from None
+
     def close(self):
         """
         Cleanup: Skill.__intents is static to enable backward-compatible "@intent_handler" decorators,
@@ -206,7 +215,7 @@ class Skill(FastAPI):
         To force cleanup:
 
             >>> from contextlib import closing
-            >>> with init_app():
+            >>> with closing(init_app()):
             >>>     ... # do your things
 
         """

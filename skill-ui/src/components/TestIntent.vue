@@ -27,122 +27,128 @@
         </v-card>
       </v-row>
       <v-row>
-        <v-card flat>
-          <v-card-text>Intents</v-card-text>
-        </v-card>
-        <v-expansion-panels
-            accordion
-            focusable
-            v-model="intentsPanel"
-        > <v-expansion-panel
-              v-for="intent in intents" :key="intent.name" @click="select(intent)">
-            <v-expansion-panel-header>{{ intent.name }}</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-row v-for="param in intent.parameters" :key="param.name">
-                <v-col>
-                  <v-subheader>{{ param.name }}</v-subheader>
-                </v-col>
-                <v-col>
-                  <v-text-field
-                      v-model="param.values"
-                      :label="param.type"
-                      :hint="param.sample"
-                      persistent-hint
-                      clearable
-                      @change="select(intent)"
-                      :rules="param.required ? rules : []"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="2">
-                  <v-btn icon>
-                    <v-icon>mdi-plus</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-        <v-card flat>
-          <v-card-text>Session</v-card-text>
-        </v-card>
-        <v-expansion-panels>
-          <v-expansion-panel>
-            <v-expansion-panel-header v-slot="{ open }">
-              <v-row no-gutters>
-                <v-col class="text--secondary">
-                  <v-fade-transition leave-absolute>
-                    <span v-if="open">Attributes:</span>
-                    <v-row
-                        v-else
-                        style="width: 100%"
-                    >
-                      <v-col cols="4">
-                        attrs: {{ session.attributes && '{...}' || 'Not set' }}
-                      </v-col>
-                      <v-col cols="4">
-                        id: {{ session.id || 'Not set' }}
-                      </v-col>
-                      <v-col cols="4">
-                        new: {{ session.new || 'Not set' }}
-                      </v-col>
-                    </v-row>
-                  </v-fade-transition>
-                </v-col>
-              </v-row>
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-row>
-                <v-row
-                    v-for="attr in session.attributes"
-                    :key="attr.key"
-                    justify="space-around"
-                >
-                  <v-col cols="3">
+        <v-col>
+          <v-card flat>
+            <v-card-text>Intents</v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-expansion-panels
+              accordion
+              focusable
+              v-model="intentsPanel"
+          > <v-expansion-panel
+                v-for="intent in intents" :key="intent.name" @click="select(intent)">
+              <v-expansion-panel-header>{{ intent.name }}</v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <v-row v-for="param in intent.parameters" :key="param.name">
+                  <v-col>
+                    <v-subheader>{{ param.name }}</v-subheader>
+                  </v-col>
+                  <v-col>
                     <v-text-field
-                        v-model="attr.key"
-                        label="Name"
-                        @change="intentsPanel !== null && select(intents[intentsPanel])"
+                        v-model="param.values"
+                        :label="param.type"
+                        :hint="param.sample"
+                        persistent-hint
+                        clearable
+                        @change="select(intent)"
+                        :rules="param.required ? rules : []"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="3">
-                    <v-text-field
-                        v-model="attr.value"
-                        label="Value"
-                        @change="intentsPanel !== null && select(intents[intentsPanel])"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="1">
+                  <v-col cols="2">
                     <v-btn icon>
                       <v-icon>mdi-plus</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
-                <v-row
-                    justify="space-around"
-                >
-                  <v-col cols="3">
-                    <v-text-field
-                        clearable
-                        v-model="session.id"
-                        label="id"
-                        @change="intentsPanel !== null && select(intents[intentsPanel])"
-                    ></v-text-field>
-                  </v-col>
-
-                  <v-col cols="3">
-                    <v-checkbox
-                        v-model="session.new"
-                        label="new"
-                        @change="intentsPanel !== null && select(intents[intentsPanel])"
-                    ></v-checkbox>
-                  </v-col>
-                  <v-col cols="1">
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
+          <v-card flat>
+            <v-card-text>Session</v-card-text>
+          </v-card>
+          <v-expansion-panels>
+            <v-expansion-panel>
+              <v-expansion-panel-header v-slot="{ open }">
+                <v-row no-gutters>
+                  <v-col class="text--secondary">
+                    <v-fade-transition leave-absolute>
+                      <span v-if="open">Attributes:</span>
+                      <v-row
+                          v-else
+                          style="width: 100%"
+                      >
+                        <v-col cols="4">
+                          attrs: {{ session.attributes && '{...}' || 'Not set' }}
+                        </v-col>
+                        <v-col cols="4">
+                          id: {{ session.id || 'Not set' }}
+                        </v-col>
+                        <v-col cols="4">
+                          new: {{ session.new || 'Not set' }}
+                        </v-col>
+                      </v-row>
+                    </v-fade-transition>
                   </v-col>
                 </v-row>
-              </v-row>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
+              </v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <v-row>
+                  <v-row
+                      v-for="attr in session.attributes"
+                      :key="attr.key"
+                      justify="space-around"
+                  >
+                    <v-col cols="3">
+                      <v-text-field
+                          v-model="attr.key"
+                          label="Name"
+                          @change="intentsPanel !== null && select(intents[intentsPanel])"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="3">
+                      <v-text-field
+                          v-model="attr.value"
+                          label="Value"
+                          @change="intentsPanel !== null && select(intents[intentsPanel])"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="1">
+                      <v-btn icon>
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                  <v-row
+                      justify="space-around"
+                  >
+                    <v-col cols="3">
+                      <v-text-field
+                          clearable
+                          v-model="session.id"
+                          label="id"
+                          @change="intentsPanel !== null && select(intents[intentsPanel])"
+                      ></v-text-field>
+                    </v-col>
+
+                    <v-col cols="3">
+                      <v-checkbox
+                          v-model="session.new"
+                          label="new"
+                          @change="intentsPanel !== null && select(intents[intentsPanel])"
+                      ></v-checkbox>
+                    </v-col>
+                    <v-col cols="1">
+                    </v-col>
+                  </v-row>
+                </v-row>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-col>
       </v-row>
     </v-col>
     <v-col>
