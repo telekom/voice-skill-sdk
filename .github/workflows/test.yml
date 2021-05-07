@@ -35,7 +35,7 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 ./skill_sdk --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
         # double-check formatting with
-        black skill_sdk tests --check
+        black skill_sdk tests --check --exclude tests/ui/skill
         # check typing with mypy
         mypy ./skill_sdk
     - name: Test with unittest
